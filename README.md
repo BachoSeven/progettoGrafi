@@ -12,7 +12,7 @@ Il progetto si compone di varie fasi:
     - [title.basics.tsv.gz](https://datasets.imdbws.com/title.basics.tsv.gz):      lista di film
     - [title.principals.tsv.gz](https://datasets.imdbws.com/title.principals.tsv.gz):  chi ha lavorato in quali film
   - Costruire una rete sociale rappresentata tramite il suddetto grafo ![formula](https://render.githubusercontent.com/render/math?math=G=(V,E)) utilizzando tali file. Utilizzare le liste di adiacenza per memorizzare il grafo (ed evitare problemi di eccessiva occupazione di memoria).
-  - Studiare la nozione di centralità dei nodi nei grafi, da applicare alle reti sociali, seguendo il materiale di [questo tutorial online](http://matteo.rionda.to/centrtutorial/) e il contenuto di [questo paper](AxiomsForCentrality.pdf).
+  - Studiare la nozione di centralità dei nodi nei grafi, da applicare alle reti sociali, seguendo il materiale di [questo tutorial online](https://bachoseven.github.io/progettoGrafi/) e il contenuto di [questo paper](AxiomsForCentrality.pdf).
   - Progettare e implementare degli algoritmi per la centralità, selezionandoli da quanto studiato sopra. Evitare gli algoritmi puramente numerici, essendo quest'ultimi studiati in insegnamenti dedicati, preferendo gli algoritmi che usano la struttura combinatoria del grafo descritto sopra.
 
 
