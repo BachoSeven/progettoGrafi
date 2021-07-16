@@ -1,1 +1,3 @@
-CC = cc
+CC = g++
+
+CFLAGS = -Wall

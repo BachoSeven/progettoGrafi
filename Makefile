@@ -1,16 +1,17 @@
 include config.mk
 
-SRC = grafo.c
+SRC = grafo.cpp
+OBJ = ${SRC:.cpp=}
 
-all: script grafo
+all: filtro grafo
 
-script:
+filtro:
 	./filtro.sh
 
 grafo:
-	${CC} ${SRC} -o ${SRC%.c}
+	${CC} -o ${OBJ} ${SRC} ${CFLAGS}
 
 clean:
 	rm -rf txt/*.txt grafo
 
-.PHONY: all script grafo clean
+.PHONY: all filtro grafo clean
