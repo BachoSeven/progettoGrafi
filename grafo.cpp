@@ -6,9 +6,9 @@ using namespace std;
 /* modo semplice per definire un grafo: liste di adiacenza */
 
 constexpr auto MAXN = 1000; // massimo numero di nodi
-vector<int> adj[MAXN];     // array di MAXN vector = rappresentazione mediante liste di adiacenza
-bool visitato[MAXN];				// array di booleani per stabilire quali nodi sono stati visitati
-int N,M;										// N <= MAXN numero di nodi, M = numero di archi
+vector<int> adj[MAXN];      // array di MAXN vector = rappresentazione mediante liste di adiacenza
+bool visitato[MAXN];        // array di booleani per stabilire quali nodi sono stati visitati
+int N,M;                    // N <= MAXN numero di nodi, M = numero di archi
 
 /* lettura da input */
 

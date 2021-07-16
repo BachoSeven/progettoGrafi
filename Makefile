@@ -6,6 +6,7 @@ OBJ = ${SRC:.cpp=}
 all: filtro grafo
 
 filtro:
+	mkdir -p txt
 	./filtro.sh
 
 grafo:
