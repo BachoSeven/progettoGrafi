@@ -11,15 +11,15 @@ done; wait
 
 ## Estraggo i film non adulti
 ## Salvo identificativi e nomi dei film
-zcat title.basics.tsv.gz | tail -n +2 | awk -F'\t' '$5 != 1' | cut -f1,3 > txt/FilmNonAdulti.txt
+zcat title.basics.tsv.gz | tail -n +2 | awk -F'\t' '$5 != 1' | cut --output-delimiter=' ' -f1,3 > txt/FilmNonAdulti.txt
 
 ## Estraggo solo gli attori/attrici
 ## Salvo identificativi ed i nomi
-zcat name.basics.tsv.gz | grep -E "actor|actress" | cut -f1,2 > txt/Attorə.txt
+zcat name.basics.tsv.gz | grep -E "actor|actress" | cut --output-delimiter=' ' -f1,2 > txt/Attorə.txt
 
 ## Estraggo gli attori/attrici da title.principals
 ## Salvo identificativi film-attore
 ## Infine, rimuovo i film adulti pure da qui, utilizzando FilmNonAdulti.txt
-zcat title.principals.tsv.gz | grep -E "actor|actress" | cut -f1,3 | awk 'FNR==NR { A[$1]; next } $1 in A' txt/FilmNonAdulti.txt - > txt/Relazioni.txt
+zcat title.principals.tsv.gz | grep -E "actor|actress" | cut --output-delimiter=' ' -f1,3 | awk 'FNR==NR { A[$1]; next } $1 in A' txt/FilmNonAdulti.txt - > txt/Relazioni.txt
 
 nodi="$(wc -l txt/Attorə.txt)"
