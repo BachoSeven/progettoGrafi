@@ -1,20 +1,19 @@
 #include <iostream>
-#include <vector>		 // vector per le liste di adiacenza
+#include <vector>
 
 using namespace std;
 
-/* modo semplice per definire un grafo: liste di adiacenza */
-
+/*
+ * definizioni per le liste di adiacenza
+*/
 constexpr auto MAXN = 1000; // massimo numero di nodi
 vector<int> adj[MAXN];      // array di MAXN vector = rappresentazione mediante liste di adiacenza
 bool visitato[MAXN];        // array di booleani per stabilire quali nodi sono stati visitati
 int N,M;                    // N <= MAXN numero di nodi, M = numero di archi
 
-/* lettura da input */
-
 void leggiGrafo()
 {
-	freopen("txt/grafo.txt", "r", stdin); // redireziona la lettura da stdin alla lettura di un file
+	freopen("txt/Grafo.txt", "r", stdin); // redireziona la lettura da stdin alla lettura di un file
 
 	cin >> N >> M;
 
