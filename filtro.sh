@@ -18,7 +18,7 @@ zcat title.basics.tsv.gz |\
 
 zcat name.basics.tsv.gz |\
 	# Estraggo solo gli attori/attrici
-	awk -F'\t' '$5 == "actor" || $5 == "actress"' |\
+	awk -F'\t' '$5 ~ "actor" || $5 ~ "actress"' |\
 	# Salvo identificativi ed i nomi
 	cut --output-delimiter=' ' -f1,2 |\
 	# Utilizzo `sed` per rendere l'output più leggibile
@@ -34,7 +34,7 @@ zcat title.principals.tsv.gz |\
 	# Rimuovo i film adulti pure da qui, utilizzando FilmFiltrati.txt
 	awk 'FNR==NR { A[$1]; next } $1 in A' txt/FilmFiltrati.txt - > txt/Relazioni.txt
 
-# numero di archi (con possibili archi duplicati)
+# numero di archi (con possibili archi duplicati) [NON HA SENSO]
 echo "$(cat txt/Relazioni.txt | cut -d' ' -f2 | sort | uniq | wc -l | cut -f1 -d' ')" > txt/info.txt
 # numero di nodi
 echo "$(wc -l txt/Attorə.txt | cut -f1 -d' ')" >> txt/info.txt

@@ -1,16 +1,17 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <algorithm>
 
 using namespace std;
 
 /*
  * definizioni per le liste di adiacenza
 */
-constexpr auto MAXN = 1000; // massimo numero di nodi
-vector<int> adj[MAXN];      // array di MAXN vector = rappresentazione mediante liste di adiacenza
-bool visitato[MAXN];        // array di booleani per stabilire quali nodi sono stati visitati
-int M,N;                    // N <= MAXN numero di nodi, M = numero di archi
+constexpr auto MAXN = 4077922; // massimo numero di nodi
+vector<int> adj[MAXN];
+bool visitato[MAXN];
+int M,N;
 
 struct attore{
 	int id;
