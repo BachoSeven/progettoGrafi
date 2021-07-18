@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <string>
 
 using namespace std;
 
@@ -9,21 +10,36 @@ using namespace std;
 constexpr auto MAXN = 1000; // massimo numero di nodi
 vector<int> adj[MAXN];      // array di MAXN vector = rappresentazione mediante liste di adiacenza
 bool visitato[MAXN];        // array di booleani per stabilire quali nodi sono stati visitati
-int N,M;                    // N <= MAXN numero di nodi, M = numero di archi
+int M,N;                    // N <= MAXN numero di nodi, M = numero di archi
+
+struct attore{
+	int id;
+	string name;
+};
+
+struct film{
+	int id;
+	string name;
+};
 
 void leggiGrafo()
 {
-	freopen("txt/Grafo.txt", "r", stdin); // redireziona la lettura da stdin alla lettura di un file
+	freopen("txt/info.txt", "r", stdin);
 
-	cin >> N >> M;
+	cin >> M;
+	cin >> N;
 
-	for(auto i=0;i<M;i++){ // M archi
-		int u,v;
-		cin >> u >> v; 			// arco uv non orientato
-		adj[u].push_back(v);// v è nella lista di u
-		adj[v].push_back(u);// u è nella lista di v
-	}
-	// nota: grado(u) --> adj[u].size()
+	freopen("txt/Relazioni.txt", "r", stdin);
+
+	for(auto i=0;i<M;i++){
+			int u,v;
+			cin >> u >> v;
+		 // controllo di non star duplicando un arco
+			if( find(adj[u].begin(), adj[u].end(), v) == end(adj[u]) ) { // find è O(n) con n=length(lista di adiacenza)
+				adj[u].push_back(v);
+				adj[v].push_back(u);
+			}
+	} // deg(u)=adj[u].size()
 }
 
 void stampaGrafo()
