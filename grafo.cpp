@@ -31,14 +31,27 @@ void leggiGrafo()
 	cin >> N;
 
 	freopen("txt/Relazioni.txt", "r", stdin);
+	string s;
 
 	for(auto i=0;i<M;i++){
 			int u,v;
-			cin >> u >> v;
-		 // controllo di non star duplicando un arco
-			if( find(adj[u].begin(), adj[u].end(), v) == end(adj[u]) ) { // find è O(n) con n=length(lista di adiacenza)
-				adj[u].push_back(v);
-				adj[v].push_back(u);
+			string del = “ ”;
+			cin >> s;
+			int film=s.substr(0, s.find(del));
+			int next=film;
+			int j=0;
+			if(next == film) {
+				int u=s.substr(1, s.find(del));
+				int v=s.substr(1, s.find(del));
+			 // controllo di non star duplicando un arco
+				if( find(adj[u].begin(), adj[u].end(), v) == end(adj[u]) ) { // find è O(n) con n=length(lista di adiacenza)
+					adj[u].push_back(v);
+					adj[v].push_back(u);
+				}
+				j++;
+				cin >> s;
+				int film=s.substr(0, s.find(del));
+				int next=film;
 			}
 	} // deg(u)=adj[u].size()
 }
