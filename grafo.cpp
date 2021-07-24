@@ -11,14 +11,14 @@ using namespace std;
 constexpr auto MAXN = 4077922; // massimo numero di nodi
 vector<int> adj[MAXN];
 bool visitato[MAXN];
-int M,N;
+int M,N,O;
 
-struct attore{
+struct Attore{
 	int id;
 	string name;
 };
 
-struct film{
+struct filmcrew{
 	int id;
 	string name;
 };
@@ -27,34 +27,55 @@ void leggiGrafo()
 {
 	freopen("txt/info.txt", "r", stdin);
 
-	cin >> M;
-	cin >> N;
+	cin >> M; // #"relazioni"
+	cin >> N; // #nodi
+	cin >> O; // max num attori nello stesso film
 
 	freopen("txt/Relazioni.txt", "r", stdin);
-	string s;
+	string s, t;
 
-	for(auto i=0;i<M;i++){
-			int u,v;
-			string del = “ ”;
-			cin >> s;
-			int film=s.substr(0, s.find(del));
-			int next=film;
-			int j=0;
-			if(next == film) {
-				int u=s.substr(1, s.find(del));
-				int v=s.substr(1, s.find(del));
+	int u,v;
+	string del = " ";
+
+	cin >> s;
+	int current=stoi(s.substr(0, s.find(del)));
+
+	int j=1;
+	while(j<M) {
+		cin >> t;
+		int next=stoi(t.substr(0, t.find(del)));
+		vector<string> filmcrew[O];
+		if(next == current) {
+			int u=stoi(s.substr(1, s.find(del)));
+			filmcrew.push_back(u);
+		}
+		while(next == current) {
+			int v=stoi(t.substr(1, t.find(del)));
+			filmcrew.push_back(v);
+			j++;
+			// current=next; // Non serve :)
+			cin >> t;
+			next=stoi(t.substr(0, t.find(del)));
+		}
+
+		s=t;
+		current=next;
+		j++;
+
+		for(int i=0; i<filmcrew.size(); i++) {
+			for(int j=i; i<filmcrew.size(); i++) {
+				u=filmcrew[i];
+				v=filmcrew[j];
 			 // controllo di non star duplicando un arco
 				if( find(adj[u].begin(), adj[u].end(), v) == end(adj[u]) ) { // find è O(n) con n=length(lista di adiacenza)
 					adj[u].push_back(v);
 					adj[v].push_back(u);
 				}
-				j++;
-				cin >> s;
-				int film=s.substr(0, s.find(del));
-				int next=film;
 			}
-	} // deg(u)=adj[u].size()
-}
+		}
+		delete[] filmcrew;
+	}
+} // deg(u)=adj[u].size()
 
 void stampaGrafo()
 {
