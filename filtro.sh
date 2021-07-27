@@ -37,9 +37,9 @@ zcat title.principals.tsv.gz |\
 # numero di relazioni totali
 echo "$(wc -l txt/Relazioni.txt | cut -f1 -d' ')" > txt/info.txt
 # numero di nodi (solo gli attori che compaiono in film in FilmFiltrati.txt) [sono circa la metà degli attori!]
-echo "$(cat txt/Relazioni.txt | cut -d' ' -f2 | sort | uniq | wc -l | cut -f1 -d' ')" >> txt/info.txt # Alternativa a sort|uniq: awk '!seen[$0]++'
-# massimo numero di attori in un unico film
-uniq -c txt/Relazioni.txt | awk '{if ($1>x) x=$1} END {print x}' >> txt/info.txt
+echo "$(cut -d' ' -f2 txt/Relazioni.txt | sort | uniq | wc -l | cut -f1 -d' ')" >> txt/info.txt # Alternativa a sort|uniq: awk '!seen[$0]++'
+## massimo numero di attori in un unico film
+# cut -f1 -d' ' txt/Relazioni.txt | uniq -c | awk '{if ($1>x) x=$1} END {print x}' >> txt/info.txt
 
 ## Splitto ogni film (anche no)
 # awk -F' ' '{print>$1}' Relazioni.txt

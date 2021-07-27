@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <fstream>
 #include <string>
 #include <algorithm>
 
@@ -8,20 +9,20 @@ using namespace std;
 /*
  * definizioni per le liste di adiacenza
 */
-constexpr auto MAXN = 4077922; // massimo numero di nodi
+constexpr auto MAXN = 14000000; // massimo numero di nodi
 vector<int> adj[MAXN];
 bool visitato[MAXN];
-int M,N,O;
+int M,N;
 
-struct Attore{
-	int id;
-	string name;
-};
+// struct Attore{
+	// int id;
+	// string name;
+// };
 
-struct filmcrew{
-	int id;
-	string name;
-};
+// struct Film{
+	// int id;
+	// string name;
+// };
 
 void leggiGrafo()
 {
@@ -29,58 +30,51 @@ void leggiGrafo()
 
 	cin >> M; // #"relazioni"
 	cin >> N; // #nodi
-	cin >> O; // max num attori nello stesso film
 
-	freopen("txt/Relazioni.txt", "r", stdin);
-	string s, t;
+	ifstream relazioni("txt/Relazioni.txt");
+	string s,t,r;
 
 	int u,v;
 	string del = " ";
+	vector<int> filmcrew;
 
-	cin >> s;
+	getline(relazioni,s);
 	int current=stoi(s.substr(0, s.find(del)));
 
-	int j=1;
-	while(j<M) {
-		cin >> t;
-		int next=stoi(t.substr(0, t.find(del)));
-		vector<string> filmcrew[O];
-		if(next == current) {
-			int u=stoi(s.substr(1, s.find(del)));
-			filmcrew.push_back(u);
-		}
-		while(next == current) {
-			int v=stoi(t.substr(1, t.find(del)));
-			filmcrew.push_back(v);
-			j++;
-			// current=next; // Non serve :)
-			cin >> t;
-			next=stoi(t.substr(0, t.find(del)));
-		}
+	while(getline(relazioni,t)) {
+			int next=stoi(t.substr(0, t.find(del)));
 
-		s=t;
-		current=next;
-		j++;
-
-		for(int i=0; i<filmcrew.size(); i++) {
-			for(int j=i; i<filmcrew.size(); i++) {
-				u=filmcrew[i];
-				v=filmcrew[j];
-			 // controllo di non star duplicando un arco
-				if( find(adj[u].begin(), adj[u].end(), v) == end(adj[u]) ) { // find è O(n) con n=length(lista di adiacenza)
-					adj[u].push_back(v);
-					adj[v].push_back(u);
+			if(next == current) {
+				u=stoi(s.substr(s.find(del)+1));
+				filmcrew.push_back(u);
+				while((next == current)&&(getline(relazioni,r))) {
+					v=stoi(t.substr(t.find(del)+1));
+					filmcrew.push_back(v);
+					t=r;
+					next=stoi(t.substr(0, t.find(del)));
+				}
+				for (auto primo = filmcrew.begin(); primo != filmcrew.end(); ++primo){
+					for (auto secondo = primo + 1; secondo != filmcrew.end(); ++secondo){
+						u=*primo;
+						v=*secondo;
+						// controllo di non star duplicando un arco
+						if( find(adj[u].begin(), adj[u].end(), v) == end(adj[u]) ) { // find è O(n) con n<10=length massima lista di adiacenza
+							adj[u].push_back(v);
+							adj[v].push_back(u);
+						}
+					}
 				}
 			}
+			current=next;
+			s=t;
+			filmcrew.clear();
 		}
-		delete[] filmcrew;
-	}
-} // deg(u)=adj[u].size()
+	} // deg(u)=adj[u].size()
 
 void stampaGrafo()
 {
 	cout << "liste di adiacenza" << endl;
-	for(auto u=0;u<N;u++){
+	for(auto u=0;u<N;++u){
 		cout << u << ": ";
 		for(auto v:adj[u]) // NOICE
 			cout << v << " ";
@@ -102,10 +96,10 @@ void DFSrec(int u)
 void DFS()
 {
 	int cc=0;
-	for(auto i=0;i<N;i++) // inizializzazione: nessun nodo visitato
+	for(auto i=0;i<N;++i) // inizializzazione: nessun nodo visitato
 		visitato[i]=false;
 
-	for(auto i=0;i<N;i++)
+	for(auto i=0;i<N;++i)
 		if(!visitato[i]){
 			cc++;
 			cout << "- " << cc << "a componente connessa: "  <<  i  << endl;
@@ -118,8 +112,8 @@ int main()
 	leggiGrafo();
 
 	stampaGrafo();
-	cout << endl;
+	// cout << endl;
 
-	DFS();
+	// DFS();
 	return 0;
 }
