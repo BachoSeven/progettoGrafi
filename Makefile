@@ -11,6 +11,7 @@ filtro:
 
 grafo:
 	${CC} -o ${OBJ} ${SRC} ${CFLAGS}
+	./grafo
 
 clean:
 	rm -rf txt/*.txt grafo

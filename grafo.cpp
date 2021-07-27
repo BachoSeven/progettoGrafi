@@ -115,6 +115,7 @@ int main()
 	buildG();
 
 	printG();
+	freopen("txt/info.txt", "w", stdout);
 
 	// DFS();
 	return 0;
