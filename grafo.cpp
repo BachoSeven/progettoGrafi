@@ -24,7 +24,7 @@ int M,N;
 	// string name;
 // };
 
-void leggiGrafo()
+void buildG()
 {
 	freopen("txt/info.txt", "r", stdin);
 
@@ -71,14 +71,17 @@ void leggiGrafo()
 		}
 	} // deg(u)=adj[u].size()
 
-void stampaGrafo()
+
+void printG()
 {
-	cout << "liste di adiacenza" << endl;
 	for(auto u=0;u<N;++u){
-		cout << u << ": ";
-		for(auto v:adj[u]) // NOICE
-			cout << v << " ";
-		cout << endl;
+		// Stampa lista di adiacenza solo se non è vuota.
+		if(!adj[u].empty()) {
+			cout << u << ": ";
+			for(auto v:adj[u])
+				cout << v << "\t";
+			cout << endl;
+		}
 	}
 }
 
@@ -109,10 +112,9 @@ void DFS()
 
 int main()
 {
-	leggiGrafo();
+	buildG();
 
-	stampaGrafo();
-	// cout << endl;
+	printG();
 
 	// DFS();
 	return 0;
