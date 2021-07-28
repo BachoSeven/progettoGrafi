@@ -114,8 +114,8 @@ int main()
 {
 	buildG();
 
+	freopen("txt/grafo.txt","w",stdout);
 	printG();
-	freopen("txt/info.txt", "w", stdout);
 
 	// DFS();
 	return 0;
