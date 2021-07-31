@@ -24,6 +24,42 @@ int M,N;
 	// string name;
 // };
 
+// Centrality
+float closeness(int x)
+{
+	float sum=0;
+	for(auto u=0;(u<N&&u!=x);++u) {
+		if(!adj[u].empty()) {
+			sum+=SP(u,x);
+		}
+	}
+	return (1/sum);
+}
+int degree(int x)
+{
+	return adj[x].size();
+}
+float lin(int x)
+{
+	int sum=0;
+	for(auto u=0;(u<N&&u!=x);++u) {
+		if(!adj[u].empty()) {
+			sum+=SP(u,x);
+		}
+	}
+	return (((adj[x].size())^2)/sum);
+}
+int harmonic(int x)
+{
+	int sum=0;
+	for(auto u=0;(u<N&&u!=x);++u) {
+		if(!adj[u].empty()) {
+			sum+=1/SP(u,x);
+		}
+	}
+	return sum;
+}
+
 void buildG()
 {
 	freopen("txt/info.txt", "r", stdin);
@@ -72,14 +108,12 @@ void buildG()
 	}
 }
 
-// deg(u)=adj[u].size()
-
 void printG()
 {
 	for(auto u=0;u<N;++u) {
 		// Stampa lista di adiacenza solo se non è vuota.
 		if(!adj[u].empty()) {
-			cout << u << ":";
+			cout << u << ": ";
 			for(auto v:adj[u]) {
 				cout << v << "\t";
 			}
@@ -94,7 +128,7 @@ void DFSrec(int u)
 	visitato[u]=true;
 	for(auto v:adj[u]) {
 		if(!visitato[v]) {
-			// cout << "{"<< u << ", " << v << "}" << endl;
+			cout << "{"<< u << ", " << v << "}" << endl;
 			DFSrec(v);
 		}
 	}
