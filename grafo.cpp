@@ -137,7 +137,7 @@ float closeness(int s)
 			if(!visitato[v]){
 				Q.push_back(v);
 				visitato[v]=true;
-				Dist[v]=++Dist[u];
+				Dist[v]=Dist[u]+1;
 				sum+=Dist[v];
 			}
 		}
@@ -219,9 +219,9 @@ int main()
 		struct timeval beg, end;
 
 		gettimeofday(&beg, NULL);
-		// cout << closeness(93) << endl;
 		freopen("txt/debug.txt", "w", stdout);
-		Cludo(93);
+		cout << closeness(93) << endl;
+		// Cludo(93);
 		fclose(stdout);
 		gettimeofday(&end, NULL);
 		cout << "Tempo: " << "\n\t" << ((end.tv_sec - beg.tv_sec)*1000000 + end.tv_usec - beg.tv_usec)/1000 << " ms" << endl;
