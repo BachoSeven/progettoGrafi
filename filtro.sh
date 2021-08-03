@@ -34,11 +34,11 @@ zcat title.principals.tsv.gz |\
 	# Rimuovo i film adulti pure da qui, utilizzando FilmFiltrati.txt
 	awk 'FNR==NR { A[$1]; next } $1 in A' txt/FilmFiltrati.txt - > txt/Relazioni.txt
 
-# numero di relazioni totali
-echo "$(wc -l txt/Relazioni.txt | cut -f1 -d' ')" > txt/info.txt
 # valore massimo di un identificativo di un attore dentro Relazioni.txt
 echo "$(cut -d' ' -f2 txt/Relazioni.txt | sort --numeric-sort | tail -1)" >> txt/info.txt
 
+# numero di relazioni totali
+# echo "$(wc -l txt/Relazioni.txt | cut -f1 -d' ')" > txt/info.txt
 
 # numero di nodi (solo gli attori che compaiono in film in FilmFiltrati.txt) [sono circa la metà degli attori!]
 # echo "$(cut -d' ' -f2 txt/Relazioni.txt | sort | uniq | wc -l | cut -f1 -d' ')" >> txt/info.txt # Alternativa a sort|uniq: awk '!seen[$0]++'
