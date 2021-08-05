@@ -172,9 +172,9 @@ int main()
 	// gettimeofday(&end, NULL);
 	// cout << "Tempo: " << "\n\t" << ((end.tv_sec - beg.tv_sec)*1000000 + end.tv_usec - beg.tv_usec)/1000 << " ms" << endl;
 
-		freopen("txt/debug.txt", "w", stdout);
-		geometric(306);
-		fclose(stdout);
+	// freopen("txt/debug.txt", "w", stdout);
+	geometric(306);
+	// fclose(stdout);
 
 	// DFS();
 	// DFSrec(93);
