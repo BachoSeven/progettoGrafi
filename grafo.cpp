@@ -29,32 +29,6 @@ int N;
 	// string name;
 // };
 
-// Centrality
-int degree(int x)
-{
-	return adj[x].size();
-}
-float lin(int x)
-{
-	int sum=0;
-	for(auto u=1;(u<N&&u!=x);++u) {
-		if(!adj[u].empty()) {
-			// sum+=SP(u,x);
-		}
-	}
-	return (((adj[x].size())^2)/sum);
-}
-int harmonic(int x)
-{
-	int sum=0;
-	for(auto u=1;(u<N&&u!=x);++u) {
-		if(!adj[u].empty()) {
-			// sum+=1/SP(u,x);
-		}
-	}
-	return sum;
-}
-
 void buildG()
 {
 	freopen("txt/info.txt", "r", stdin);
@@ -117,68 +91,45 @@ void printG()
 	}
 }
 
-float closeness(int s)
+int degree(int x)
+{
+	return adj[x].size();
+}
+
+void geometric(int s)
 {
 	for(auto i=0;i<N;++i)
 		visitato[i]=false;
 
 	list<int> Q;
-	Q.push_back(s); // enqueue
-	// invariante: Q contiene sono solo nodi visitati di cui conosciamo la distanza da s
+	Q.push_back(s);
 	visitato[s]=true;
 	Dist[s]=0;
 
-	float sum=0;
+	float clos=0;
+	float harm=0;
 
 	while(!Q.empty()){
-		auto u=Q.front(); // non viene estratto
+		auto u=Q.front();
 		Q.pop_front();
 		for(auto v:adj[u]){
 			if(!visitato[v]){
 				Q.push_back(v);
 				visitato[v]=true;
 				Dist[v]=Dist[u]+1;
-				sum+=Dist[v];
+				clos+=Dist[v];
+				harm+=1/Dist[v];
 			}
 		}
 	}
 
-	return (1/sum);
-}
-
-void Cludo( int s ){
-  float harmonic = 0;
-  float Clos = 0;
-
-  for (auto i=0; i<N; i++)
-    visitato[i] = false;
-
-  queue<int> coda;
-  coda.push(s);
-  visitato[s] = true;
-  Dist[s] = 0;
-
-  cout << "BFS\n\nsequenza di archi che portano a nodi non ancora visitati: " << endl;
-
-  while( !coda.empty() ){
-    auto u = coda.front();
-    coda.pop();
-    for ( auto v: adj[u] ) {
-      if (!visitato[v]){
-        cout << '(' << u << ", " << v << ')';
-        coda.push(v);
-        visitato[v] = true;
-        Dist[v] = Dist[u] + 1;
-				harmonic += 1.0 / (float)Dist[v];
-				Clos += Dist[v];
-				cout << '\t' << "++" << 1.0 / (float)Dist[v] << '\t' << "= " << harmonic << endl;
-      }
-    }
-  }
-
-
-  cout << endl << "L'indice armonico del nodo è " << harmonic << endl;
-  cout << endl << "L'indice di closeness del nodo è " << 1.0 / (float)Clos << endl;
+	// Closeness
+  cout << 1/clos << " ";
+	// Harmonic
+  cout << harm << " ";
+	// Lin
+  // cout << (Cc(x)^2)*clos << " ";
+	cout << endl;
 }
 
 /* Visita DFS in profondità */
@@ -194,7 +145,6 @@ void DFSrec(int u)
 }
 
 void DFS()
-	// TODO: vedi implementazione iterativa visita da Ludo
 {
 	int cc=0;
 	for(auto i=0;i<N;++i) // inizializzazione: nessun nodo visitato
@@ -216,15 +166,15 @@ int main()
 	// freopen("txt/grafo.txt","w",stdout);
 	// printG();
 
-		struct timeval beg, end;
+	// struct timeval beg, end;
+	// gettimeofday(&beg, NULL);
+	// STUFF
+	// gettimeofday(&end, NULL);
+	// cout << "Tempo: " << "\n\t" << ((end.tv_sec - beg.tv_sec)*1000000 + end.tv_usec - beg.tv_usec)/1000 << " ms" << endl;
 
-		gettimeofday(&beg, NULL);
 		freopen("txt/debug.txt", "w", stdout);
-		cout << closeness(93) << endl;
-		// Cludo(93);
+		geometric(306);
 		fclose(stdout);
-		gettimeofday(&end, NULL);
-		cout << "Tempo: " << "\n\t" << ((end.tv_sec - beg.tv_sec)*1000000 + end.tv_usec - beg.tv_usec)/1000 << " ms" << endl;
 
 	// DFS();
 	// DFSrec(93);
