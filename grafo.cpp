@@ -206,11 +206,6 @@ vector<int> componente(int x)
 	return Cc;
 }
 
-int degree(int x)
-{
-	return adj[x].size();
-}
-
 int main()
 {
 	srand(time(NULL));
@@ -242,7 +237,8 @@ int main()
 				freopen("txt/debug.txt", "a", stdout);
 				for(auto j:Cc) {
 					// _lin[j]=(float)(S^2)*_clos[j];
-					cout << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << (_harm[j]/(float)k) << " " << endl;
+					// sintassi: nodo: grado closeness harmonic
+					cout << j << ": " << adj[j].size() << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << (_harm[j]/(float)k) << endl;
 				}
 				cout << endl;
 				fclose(stdout);
