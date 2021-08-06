@@ -3,21 +3,21 @@
 #include <string>
 #include <fstream> // getline
 #include <algorithm> // find
-#include <list>	// coda
-
-#include <queue>
+#include <queue>	// coda
+#include <math.h> // ceil
 #include <sys/time.h> // per gettimeofday
 
 using namespace std;
 
-/*
- * definizioni per le liste di adiacenza
-*/
-constexpr auto MAXN = 14000000; // massimo numero di nodi
+constexpr int MAXN = 14000000; // massimo numero di nodi
 vector<int> adj[MAXN];
 bool visitato[MAXN];
 int Dist[MAXN];
 int N;
+// per approx
+int _harm[MAXN];
+int _clos[MAXN];
+int S; // grandezza componenti
 
 // struct Attore{
 	// int id;
@@ -29,11 +29,38 @@ int N;
 	// string name;
 // };
 
+/* Visita DFS in profondità */
+void DFSrec(int u)
+{
+	visitato[u]=true;
+	for(auto v:adj[u]) {
+		if(!visitato[v]) {
+			cout << "{"<< u << ", " << v << "}" << endl;
+			DFSrec(v);
+		}
+	}
+}
+
+void DFS()
+{
+	int cc=0;
+	for(int i=0;i<N;++i) // inizializzazione: nessun nodo visitato
+		visitato[i]=false;
+
+	for(int i=0;i<N;++i) {
+		if(!visitato[i]) {
+			cc++;
+			cout << "- " << cc << "a componente connessa: "  <<  i  << endl;
+			DFSrec(i);
+		}
+	}
+}
+
 void buildG()
 {
 	freopen("txt/info.txt", "r", stdin);
 
-	cin >> N; // #valore massimo di un identificativo di un attore
+	cin >> N; // valore massimo di un identificativo di un attore
 	N++;
 
 	ifstream relazioni("txt/Relazioni.txt");
@@ -79,7 +106,7 @@ void buildG()
 
 void printG()
 {
-	for(auto u=1;u<N;++u) {
+	for(int u=1;u<N;++u) {
 		// Stampa lista di adiacenza solo se non è vuota.
 		if(!adj[u].empty()) {
 			cout << u << ": ";
@@ -91,30 +118,25 @@ void printG()
 	}
 }
 
-int degree(int x)
-{
-	return adj[x].size();
-}
-
 void geometric(int s)
 {
-	for(auto i=0;i<N;++i)
+	for(int i=0;i<N;++i)
 		visitato[i]=false;
 
-	list<int> Q;
-	Q.push_back(s);
+	queue<int> Q;
+	Q.push(s);
 	visitato[s]=true;
 	Dist[s]=0;
 
 	float clos=0;
 	float harm=0;
 
-	while(!Q.empty()){
+	while(!Q.empty()) {
 		auto u=Q.front();
-		Q.pop_front();
-		for(auto v:adj[u]){
-			if(!visitato[v]){
-				Q.push_back(v);
+		Q.pop();
+		for(auto v:adj[u]) {
+			if(!visitato[v]) {
+				Q.push(v);
 				visitato[v]=true;
 				Dist[v]=Dist[u]+1;
 				clos+=Dist[v];
@@ -128,52 +150,105 @@ void geometric(int s)
 	// Harmonic
   cout << harm << " ";
 	// Lin
-  // cout << (Cc(x)^2)*clos << " ";
+	cout << (S^2)*clos << " ";
 	cout << endl;
 }
 
-/* Visita DFS in profondità */
-void DFSrec(int u)
+void geom_sample(vector<int> sample, vector<int> comp)
 {
-	visitato[u]=true;
-	for(auto v:adj[u]) {
-		if(!visitato[v]) {
-			cout << "{"<< u << ", " << v << "}" << endl;
-			DFSrec(v);
+	for(auto i:comp) {
+		visitato[i]=false;
+
+	for(auto s:sample) {
+			queue<int> Q;
+			Q.push(s);
+			visitato[s]=true;
+			Dist[s]=0;
+
+			while(!Q.empty()) {
+				auto u=Q.front();
+				Q.pop();
+				for(auto v:adj[u]) {
+					if(!visitato[v]) {
+						Q.push(v);
+						visitato[v]=true;
+						Dist[v]=Dist[u]+1;
+						_harm[v]+=1/Dist[v];
+						_clos[v]+=Dist[v];
+					}
+				}
+			}
 		}
+	}
+	int k=sample.size();
+	for(auto j:comp) {
+		cout << _clos[j] << _harm[j] << endl;
+		// cout << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << (_harm[j]/(float)k) << endl;
 	}
 }
 
-void DFS()
+vector<int> componente(int x)
 {
-	int cc=0;
-	for(auto i=0;i<N;++i) // inizializzazione: nessun nodo visitato
+	vector<int> Cc;
+	for(int i=0;i<N;i++)
 		visitato[i]=false;
 
-	for(auto i=0;i<N;++i) {
-		if(!visitato[i]) {
-			cc++;
-			cout << "- " << cc << "a componente connessa: "  <<  i  << endl;
-			DFSrec(i);
+	queue<int> Q;
+	Q.push(x);
+	visitato[x]=true;
+
+	while(!Q.empty()) {
+		auto u=Q.front();
+		Q.pop();
+		for(auto v:adj[u]) {
+			if(!visitato[v]) {
+				Q.push(v);
+				visitato[v]=true;
+				Cc.push_back(v);
+			}
 		}
 	}
+	return Cc;
+}
+
+int degree(int x)
+{
+	return adj[x].size();
 }
 
 int main()
 {
+	srand(time(NULL));
+
 	buildG();
+
+	for(int i=1;i<N;++i) {
+		if(!adj[i].empty()&&!visitato[i]) {
+			vector<int> Cc=componente(i);
+			int S=Cc.size();
+			if(S>100) {
+				// delta=0.1; eps=0.5
+				int k=ceil(2*(4)*(log(2)+log(S)+log(10)));
+				vector<int> sample;
+				for (int i = 0; i < k; ++i) {
+					sample.push_back(Cc[(rand() % S)]);
+				}
+
+				struct timeval beg, end;
+				gettimeofday(&beg, NULL);
+				freopen("txt/debug.txt", "w", stdout);
+					geom_sample(sample,Cc);
+				gettimeofday(&end, NULL);
+				fclose(stdout);
+				cout << "Tempo: " << "\n\t" << ((end.tv_sec - beg.tv_sec)*1000000 + end.tv_usec - beg.tv_usec)/1000 << " ms" << endl;
+
+				geometric(306);
+			}
+		}
+	}
 
 	// freopen("txt/grafo.txt","w",stdout);
 	// printG();
-
-	// struct timeval beg, end;
-	// gettimeofday(&beg, NULL);
-	// STUFF
-	// gettimeofday(&end, NULL);
-	// cout << "Tempo: " << "\n\t" << ((end.tv_sec - beg.tv_sec)*1000000 + end.tv_usec - beg.tv_usec)/1000 << " ms" << endl;
-
-	// freopen("txt/debug.txt", "w", stdout);
-	geometric(306);
 	// fclose(stdout);
 
 	// DFS();
