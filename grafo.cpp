@@ -15,8 +15,9 @@ bool visitato[MAXN];
 int Dist[MAXN];
 int N;
 // per approx
-int _harm[MAXN];
-int _clos[MAXN];
+float _harm[MAXN];
+float _clos[MAXN];
+float _lin[MAXN];
 int S; // grandezza componenti
 
 // struct Attore{
@@ -150,40 +151,34 @@ void geometric(int s)
 	// Harmonic
   cout << harm << " ";
 	// Lin
-	cout << (S^2)*clos << " ";
+	cout << (float)(S^2)*clos << " ";
 	cout << endl;
 }
 
 void geom_sample(vector<int> sample, vector<int> comp)
 {
-	for(auto i:comp) {
-		visitato[i]=false;
-
 	for(auto s:sample) {
-			queue<int> Q;
-			Q.push(s);
-			visitato[s]=true;
-			Dist[s]=0;
+		for(auto i:comp) {
+			visitato[i]=false;
+		}
+		queue<int> Q;
+		Q.push(s);
+		visitato[s]=true;
+		Dist[s]=0;
 
-			while(!Q.empty()) {
-				auto u=Q.front();
-				Q.pop();
-				for(auto v:adj[u]) {
-					if(!visitato[v]) {
-						Q.push(v);
-						visitato[v]=true;
-						Dist[v]=Dist[u]+1;
-						_harm[v]+=1/Dist[v];
-						_clos[v]+=Dist[v];
-					}
+		while(!Q.empty()) {
+			auto u=Q.front();
+			Q.pop();
+			for(auto v:adj[u]) {
+				if(!visitato[v]) {
+					Q.push(v);
+					visitato[v]=true;
+					Dist[v]=Dist[u]+1;
+					_clos[v]+=Dist[v];
+					_harm[v]+=(float)1/Dist[v];
 				}
 			}
 		}
-	}
-	int k=sample.size();
-	for(auto j:comp) {
-		cout << _clos[j] << _harm[j] << endl;
-		// cout << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << (_harm[j]/(float)k) << endl;
 	}
 }
 
@@ -233,16 +228,26 @@ int main()
 				for (int i = 0; i < k; ++i) {
 					sample.push_back(Cc[(rand() % S)]);
 				}
+				for(auto i:Cc) {
+					_harm[i]=0;
+					_clos[i]=0;
+				}
 
 				struct timeval beg, end;
 				gettimeofday(&beg, NULL);
-				freopen("txt/debug.txt", "w", stdout);
-					geom_sample(sample,Cc);
+				geom_sample(sample,Cc);
 				gettimeofday(&end, NULL);
-				fclose(stdout);
-				cout << "Tempo: " << "\n\t" << ((end.tv_sec - beg.tv_sec)*1000000 + end.tv_usec - beg.tv_usec)/1000 << " ms" << endl;
+				cout << "Tempo di esecuzione: " << "\n\t" << ((end.tv_sec - beg.tv_sec)*1000000 + end.tv_usec - beg.tv_usec)/1000 << " ms" << endl;
 
-				geometric(306);
+				freopen("txt/debug.txt", "a", stdout);
+				for(auto j:Cc) {
+					// _lin[j]=(float)(S^2)*_clos[j];
+					cout << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << (_harm[j]/(float)k) << " " << endl;
+				}
+				cout << endl;
+				fclose(stdout);
+
+				// geometric(306);
 			}
 		}
 	}
