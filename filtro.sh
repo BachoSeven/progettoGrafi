@@ -39,13 +39,13 @@ main() {
 		awk 'FNR==NR { A[$1]; next } $1 in A' txt/FilmFiltrati.txt - > txt/Relazioni.txt
 
 	# valore massimo di un identificativo di un attore dentro Relazioni.txt
-	echo "$(sort -k 2 --numeric-sort txt/Relazioni.txt | tail -1)" > txt/info.txt
+	echo "$(cut -f2 -d' ' txt/Relazioni.txt | sort --numeric-sort | tail -1)" > txt/info.txt
 
 	# numero di relazioni totali
 	# echo "$(wc -l txt/Relazioni.txt | cut -f1 -d' ')"
 
 	# numero di nodi (solo gli attori che compaiono in film in FilmFiltrati.txt) [sono circa la metà degli attori!]
-	# echo "$(sort --numeric-sort -k 2 txt/Relazioni.txt | uniq | wc -l | cut -f1 -d' ')" # Alternativa a sort|uniq: cut -f2|awk '!seen[$0]++'
+	# echo "$(cut -f2 -d' ' txt/Relazioni.txt | sort --numeric-sort | uniq | wc -l | cut -f1 -d' ')" # Alternativa: awk '!seen[$0]++'
 
 	## massimo numero di attori in un unico film (è 10)
 	# cut -f1 -d' ' txt/Relazioni.txt | uniq -c | awk '{if ($1>x) x=$1} END {print x}'
