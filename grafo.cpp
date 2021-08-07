@@ -162,6 +162,7 @@ void geom_exact(int s,int S)
 		}
 	}
 
+	// valori normalizzati per confrontarli con le approssimazioni
 	cout << (S-1)*1./clos << " " << harm/(S-1) << endl;
 	// Lin
 	// cout << (float)(S^2)*clos << " ";
@@ -198,32 +199,33 @@ void geom_sample(vector<int> sample, vector<int> comp)
 void printTop(vector<int> Cc)
 {
 	priority_queue<pair<float,int>> P,Q;
-	int k=100;
+	int m=100;
 	for (auto i:Cc) {
-		// Così sarebbe O(n*log(n)), migliorato sotto ad O(n*log(k)) tramite heap min
-		// P.push(pair<float,int>(_clos[i],i));
-		// Q.push(pair<float,int>(_harm[i],i));
-		if(P.size()<(unsigned)k) {
+		// O(S*log(m)) tramite heap min
+		if(P.size()<(unsigned)m) {
 				P.push(pair<float,int>(_clos[i],i));
 		} else if(P.top().first<_clos[i]) {
 				P.pop();
 				P.push(pair<float,int>(_clos[i], i));
 		}
-		if(Q.size()<(unsigned)k) {
+		if(Q.size()<(unsigned)m) {
 				Q.push(pair<float,int>(_harm[i],i));
 		} else if(Q.top().first <_harm[i]) {
 				Q.pop();
 				Q.push(pair<float,int>(_harm[i], i));
 		}
 	}
-	cout << "i\t|  Closeness\t|  Harmonic" << endl;
-	cout << "------------------------------------" << endl;
-	for (int i=0; i<k; ++i) {
+	cout << "i\t| Closeness\t\t\t| Harmonic" << endl;
+	cout << "--------------------------------------------------" << endl;
+	for (int i=0; i<m; ++i) {
 		int _i=P.top().second;
 		int __i=Q.top().second;
 		Actor p = *(find_if(A.begin(), A.end(), [_i](const Actor &a) { return a.id == _i; }));
 		Actor q = *(find_if(A.begin(), A.end(), [__i](const Actor &a) { return a.id == __i; }));
-		cout << i+1 << "\t| " << p.name << "\t| " << q.name << endl;
+		if(i==0)
+			cout << "1 🏅" << "\t| " << p.name << "\t\t\t| " << q.name << endl;
+		else
+			cout << i+1 << "\t| " << p.name << "\t\t\t| " << q.name << endl;
 		P.pop();
 		Q.pop();
 	}
@@ -251,11 +253,11 @@ int main()
 		if(!adj[i].empty()&&!visitato[i]) {
 			vector<int> Cc=componente(i);
 			int S=Cc.size();
-			if(S>100) {
+			if(S>1000) {
 				// delta=0.1; eps=0.5 (k=139)
-				int k=ceil(2*(4)*(log(2)+log(S)+log(10)));
+				// int k=ceil(2*(4)*(log(2)+log(S)+log(10)));
 				// delta=0.05; eps=0.4 (k=225)
-				// int k=ceil(2*(6.25)*(log(2)+log(S)+log(20)));
+				int k=ceil(2*(6.25)*(log(2)+log(S)+log(20)));
 				vector<int> sample;
 				for (int i=0; i<k; ++i) {
 					sample.push_back(Cc[(rand() % S)]);
