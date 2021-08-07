@@ -116,7 +116,28 @@ void printG()
 	}
 }
 
-void geom_exact(int s)
+vector<int> componente(int x)
+{
+	vector<int> Cc;
+	queue<int> Q;
+	Q.push(x);
+	visitato[x]=true;
+
+	while(!Q.empty()) {
+		auto u=Q.front();
+		Q.pop();
+		for(auto v:adj[u]) {
+			if(!visitato[v]) {
+				Q.push(v);
+				visitato[v]=true;
+				Cc.push_back(v);
+			}
+		}
+	}
+	return Cc;
+}
+
+void geom_exact(int s,int S)
 {
 	for(int i=0;i<N;++i)
 		visitato[i]=false;
@@ -138,22 +159,15 @@ void geom_exact(int s)
 				visitato[v]=true;
 				Dist[v]=Dist[u]+1;
 				clos+=Dist[v];
-				harm+=1.0/(float)Dist[v];
+				harm+=1./Dist[v];
 			}
 		}
 	}
 
-	// // Closeness
-  // cout << 1/clos << " ";
-	// // Harmonic
-  // cout << harm << " ";
-	// // Lin
-	// vector<int> Cc=componente(s);
-	// int S=Cc.size();
+	cout << (S-1)*1./clos << " " << harm/(S-1) << endl;
+	// Lin
 	// cout << (float)(S^2)*clos << " ";
 	// cout << endl;
-
-	cout << 1.0/clos << " " << harm << endl;
 }
 
 // TODO: implementa betwenness assieme a queste
@@ -177,32 +191,11 @@ void geom_sample(vector<int> sample, vector<int> comp)
 					visitato[v]=true;
 					Dist[v]=Dist[u]+1;
 					_clos[v]+=Dist[v];
-					_harm[v]+=1.0/(float)Dist[v];
+					_harm[v]+=1./Dist[v];
 				}
 			}
 		}
 	}
-}
-
-vector<int> componente(int x)
-{
-	vector<int> Cc;
-	queue<int> Q;
-	Q.push(x);
-	visitato[x]=true;
-
-	while(!Q.empty()) {
-		auto u=Q.front();
-		Q.pop();
-		for(auto v:adj[u]) {
-			if(!visitato[v]) {
-				Q.push(v);
-				visitato[v]=true;
-				Cc.push_back(v);
-			}
-		}
-	}
-	return Cc;
 }
 
 int main()
@@ -241,7 +234,7 @@ int main()
 				for(auto j:Cc) {
 					// _lin[j]=(float)(S^2)*_clos[j];
 					// sintassi: nodo: grado closeness harmonic
-					cout << j << ": " << adj[j].size() << " " << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << (_harm[j]/(float)k) << endl;
+					cout << j << ": " << adj[j].size() << " " << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << ((float)S*_harm[j])/((float)(S-1)*(float)k) << endl;
 				}
 				cout << endl;
 				fclose(stdout);
@@ -252,8 +245,9 @@ int main()
 		}
 	}
 
-	geom_exact(616);
-	geom_exact(306);
+	vector<int> Cc=componente(306);
+	int S=Cc.size();
+	cout << "Esatti: " << endl << "616: " << geom_exact(616,S) << endl << "306: " geom_exact(306,S) << endl;
 
 	// freopen("txt/grafo.txt","w",stdout);
 	// printG();
