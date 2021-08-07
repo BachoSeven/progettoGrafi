@@ -15,8 +15,8 @@ bool visitato[MAXN];
 int Dist[MAXN];
 int N;
 // per approx
-float _harm[MAXN];
 float _clos[MAXN];
+float _harm[MAXN];
 float _lin[MAXN];
 int S; // grandezza componenti
 
@@ -116,7 +116,7 @@ void printG()
 	}
 }
 
-void geometric(int s)
+void geom_exact(int s)
 {
 	for(int i=0;i<N;++i)
 		visitato[i]=false;
@@ -138,18 +138,22 @@ void geometric(int s)
 				visitato[v]=true;
 				Dist[v]=Dist[u]+1;
 				clos+=Dist[v];
-				harm+=1/Dist[v];
+				harm+=1.0/(float)Dist[v];
 			}
 		}
 	}
 
-	// Closeness
-  cout << 1/clos << " ";
-	// Harmonic
-  cout << harm << " ";
-	// Lin
-	cout << (float)(S^2)*clos << " ";
-	cout << endl;
+	// // Closeness
+  // cout << 1/clos << " ";
+	// // Harmonic
+  // cout << harm << " ";
+	// // Lin
+	// vector<int> Cc=componente(s);
+	// int S=Cc.size();
+	// cout << (float)(S^2)*clos << " ";
+	// cout << endl;
+
+	cout << 1.0/clos << " " << harm << endl;
 }
 
 // TODO: implementa betwenness assieme a queste
@@ -173,7 +177,7 @@ void geom_sample(vector<int> sample, vector<int> comp)
 					visitato[v]=true;
 					Dist[v]=Dist[u]+1;
 					_clos[v]+=Dist[v];
-					_harm[v]+=(float)1/Dist[v];
+					_harm[v]+=1.0/(float)Dist[v];
 				}
 			}
 		}
@@ -214,10 +218,12 @@ int main()
 			vector<int> Cc=componente(i);
 			int S=Cc.size();
 			if(S>100) {
-				// delta=0.1; eps=0.5
-				int k=ceil(2*(4)*(log(2)+log(S)+log(10)));
+				// // delta=0.1; eps=0.5 (k=139)
+				// int k=ceil(2*(4)*(log(2)+log(S)+log(10)));
+				// delta=0.05; eps=0.4 (k=225)
+				int k=ceil(2*(6.25)*(log(2)+log(S)+log(20)));
 				vector<int> sample;
-				for (int i = 0; i < k; ++i) {
+				for (int i=0;i<k;++i) {
 					sample.push_back(Cc[(rand() % S)]);
 				}
 				for(auto i:Cc) {
@@ -240,12 +246,14 @@ int main()
 				cout << endl;
 				fclose(stdout);
 
-				// geometric(306);
 
 				sample.clear();
 			}
 		}
 	}
+
+	geom_exact(616);
+	geom_exact(306);
 
 	// freopen("txt/grafo.txt","w",stdout);
 	// printG();
