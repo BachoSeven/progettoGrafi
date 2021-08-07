@@ -9,28 +9,33 @@
 
 using namespace std;
 
-constexpr int MAXN = 14000000; // massimo numero di nodi
+struct Film {
+	int id;
+	string name;
+};
+
+struct Actor {
+	int id;
+	string name;
+};
+
+// valore massimo di un identificativo di un attore
+int N;
+constexpr int MAXN=13000000;
 vector<int> adj[MAXN];
 bool visitato[MAXN];
 int Dist[MAXN];
-int N;
+
 // per approx
 float _clos[MAXN];
 float _harm[MAXN];
 float _lin[MAXN];
 int S; // grandezza componenti
 
-struct Attore{
-	int id;
-	string name;
-};
+vector<Actor> A;
+vector<Film> F;
 
-struct Film{
-	int id;
-	string name;
-};
-
-void createstructs()
+void readNames()
 {
 	ifstream attori("txt/Attorə.txt");
 	ifstream film("txt/FilmFiltrati.txt");
@@ -38,10 +43,8 @@ void createstructs()
 	string s,t;
 	string del=" ";
 
-	vector<Attore> A;
-	vector<Film> F;
 	while(getline(attori,s)) {
-		Attore tmp;
+		Actor tmp;
 		tmp.id=stoi(s.substr(0, s.find(del)));
 		tmp.name=s.substr(s.find(del)+1);
 		A.push_back(tmp);
@@ -56,11 +59,6 @@ void createstructs()
 
 void buildG()
 {
-	freopen("txt/info.txt", "r", stdin);
-
-	cin >> N; // valore massimo di un identificativo di un attore
-	N++;
-
 	ifstream relazioni("txt/Relazioni.txt");
 	string s,t,r;
 
@@ -139,7 +137,7 @@ vector<int> componente(int x)
 
 void geom_exact(int s,int S)
 {
-	for(int i=0;i<N;++i)
+	for(int i=0; i<N; ++i)
 		visitato[i]=false;
 
 	queue<int> Q;
@@ -167,10 +165,9 @@ void geom_exact(int s,int S)
 	cout << (S-1)*1./clos << " " << harm/(S-1) << endl;
 	// Lin
 	// cout << (float)(S^2)*clos << " ";
-	// cout << endl;
 }
 
-// TODO: implementa betwenness assieme a queste
+// TODO: implementa betwenness assieme a queste (slide+paper, https://www.cl.cam.ac.uk/teaching/1617/MLRD/handbook/brandes.html)
 void geom_sample(vector<int> sample, vector<int> comp)
 {
 	for(auto s:sample) {
@@ -198,25 +195,69 @@ void geom_sample(vector<int> sample, vector<int> comp)
 	}
 }
 
+void printTop(vector<int> Cc)
+{
+	priority_queue<pair<float,int>> P,Q;
+	int k=100;
+	for (auto i:Cc) {
+		// Così sarebbe O(n*log(n)), migliorato sotto ad O(n*log(k)) tramite heap min
+		// P.push(pair<float,int>(_clos[i],i));
+		// Q.push(pair<float,int>(_harm[i],i));
+		if(P.size()<(unsigned)k) {
+				P.push(pair<float,int>(_clos[i],i));
+		} else if(P.top().first<_clos[i]) {
+				P.pop();
+				P.push(pair<float,int>(_clos[i], i));
+		}
+		if(Q.size()<(unsigned)k) {
+				Q.push(pair<float,int>(_harm[i],i));
+		} else if(Q.top().first <_harm[i]) {
+				Q.pop();
+				Q.push(pair<float,int>(_harm[i], i));
+		}
+	}
+	cout << "i\t|  Closeness\t|  Harmonic" << endl;
+	cout << "------------------------------------" << endl;
+	for (int i=0; i<k; ++i) {
+		int _i=P.top().second;
+		int __i=Q.top().second;
+		Actor p = *(find_if(A.begin(), A.end(), [_i](const Actor &a) { return a.id == _i; }));
+		Actor q = *(find_if(A.begin(), A.end(), [__i](const Actor &a) { return a.id == __i; }));
+		cout << i+1 << "\t| " << p.name << "\t| " << q.name << endl;
+		P.pop();
+		Q.pop();
+	}
+}
+
 int main()
 {
 	srand(time(NULL));
 
+	freopen("txt/info.txt", "r", stdin);
+	cin >> N;
+	// N++;
+
+	readNames();
+
 	buildG();
 
-	for(int i=0;i<N;++i)
+	// freopen("txt/grafo.txt","w",stdout);
+	// printG();
+	// fclose(stdout);
+
+	for(int i=0; i<N; ++i)
 		visitato[i]=false;
-	for(int i=1;i<N;++i) {
+	for(int i=1; i<N; ++i) {
 		if(!adj[i].empty()&&!visitato[i]) {
 			vector<int> Cc=componente(i);
 			int S=Cc.size();
 			if(S>100) {
-				// // delta=0.1; eps=0.5 (k=139)
-				// int k=ceil(2*(4)*(log(2)+log(S)+log(10)));
+				// delta=0.1; eps=0.5 (k=139)
+				int k=ceil(2*(4)*(log(2)+log(S)+log(10)));
 				// delta=0.05; eps=0.4 (k=225)
-				int k=ceil(2*(6.25)*(log(2)+log(S)+log(20)));
+				// int k=ceil(2*(6.25)*(log(2)+log(S)+log(20)));
 				vector<int> sample;
-				for (int i=0;i<k;++i) {
+				for (int i=0; i<k; ++i) {
 					sample.push_back(Cc[(rand() % S)]);
 				}
 				for(auto i:Cc) {
@@ -224,36 +265,29 @@ int main()
 					_clos[i]=0;
 				}
 
-				struct timeval beg, end;
-				gettimeofday(&beg, NULL);
+				// struct timeval beg, end;
+				// gettimeofday(&beg, NULL);
 				geom_sample(sample,Cc);
-				gettimeofday(&end, NULL);
-				cout << "Tempo di esecuzione: " << "\n\t" << ((end.tv_sec - beg.tv_sec)*1000000 + end.tv_usec - beg.tv_usec)/1000 << " ms" << endl;
+				// gettimeofday(&end, NULL);
+				// cout << "Tempo di esecuzione: " << "\n\t" << ((end.tv_sec - beg.tv_sec)*1000000 + end.tv_usec - beg.tv_usec)/1000 << " ms" << endl;
 
-				freopen("txt/centrality.txt", "a", stdout);
-				for(auto j:Cc) {
-					// _lin[j]=(float)(S^2)*_clos[j];
-					// sintassi: nodo: grado closeness harmonic
-					cout << j << ": " << adj[j].size() << " " << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << ((float)S*_harm[j])/((float)(S-1)*(float)k) << endl;
-				}
-				cout << endl;
-				fclose(stdout);
+				// freopen("txt/centrality.txt", "a", stdout);
+				// for(auto j:Cc) {
+					// // _lin[j]=(float)(S^2)*_clos[j];
+					// // sintassi: nodo: grado closeness harmonic
+					// cout << j << ": " << adj[j].size() << " " << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << ((float)S*_harm[j])/((float)(S-1)*(float)k) << endl;
+				// }
+				// cout << endl;
+				// fclose(stdout);
 
+				// geom_exact(306,S);
+				// geom_exact(616,S);
+
+				printTop(Cc);
 
 				sample.clear();
 			}
 		}
 	}
-
-	vector<int> Cc=componente(306);
-	int S=Cc.size();
-	cout << "Esatti: " << endl << "616: " << geom_exact(616,S) << endl << "306: " geom_exact(306,S) << endl;
-
-	// freopen("txt/grafo.txt","w",stdout);
-	// printG();
-	// fclose(stdout);
-
-	// DFS();
-	// DFSrec(93);
 	return 0;
 }
