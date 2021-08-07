@@ -20,40 +20,37 @@ float _clos[MAXN];
 float _lin[MAXN];
 int S; // grandezza componenti
 
-// struct Attore{
-	// int id;
-	// string name;
-// };
+struct Attore{
+	int id;
+	string name;
+};
 
-// struct Film{
-	// int id;
-	// string name;
-// };
+struct Film{
+	int id;
+	string name;
+};
 
-/* Visita DFS in profondità */
-void DFSrec(int u)
+void createstructs()
 {
-	visitato[u]=true;
-	for(auto v:adj[u]) {
-		if(!visitato[v]) {
-			cout << "{"<< u << ", " << v << "}" << endl;
-			DFSrec(v);
-		}
+	ifstream attori("txt/Attorə.txt");
+	ifstream film("txt/FilmFiltrati.txt");
+
+	string s,t;
+	string del=" ";
+
+	vector<Attore> A;
+	vector<Film> F;
+	while(getline(attori,s)) {
+		Attore tmp;
+		tmp.id=stoi(s.substr(0, s.find(del)));
+		tmp.name=s.substr(s.find(del)+1);
+		A.push_back(tmp);
 	}
-}
-
-void DFS()
-{
-	int cc=0;
-	for(int i=0;i<N;++i) // inizializzazione: nessun nodo visitato
-		visitato[i]=false;
-
-	for(int i=0;i<N;++i) {
-		if(!visitato[i]) {
-			cc++;
-			cout << "- " << cc << "a componente connessa: "  <<  i  << endl;
-			DFSrec(i);
-		}
+	while(getline(film,t)) {
+		Film tmp;
+		tmp.id=stoi(t.substr(0, t.find(del)));
+		tmp.name=t.substr(t.find(del)+1);
+		F.push_back(tmp);
 	}
 }
 
@@ -68,7 +65,7 @@ void buildG()
 	string s,t,r;
 
 	int u,v;
-	string del = " ";
+	string del=" ";
 	vector<int> filmcrew;
 
 	getline(relazioni,s);
@@ -155,6 +152,7 @@ void geometric(int s)
 	cout << endl;
 }
 
+// TODO: implementa betwenness assieme a queste
 void geom_sample(vector<int> sample, vector<int> comp)
 {
 	for(auto s:sample) {
@@ -185,9 +183,6 @@ void geom_sample(vector<int> sample, vector<int> comp)
 vector<int> componente(int x)
 {
 	vector<int> Cc;
-	for(int i=0;i<N;i++)
-		visitato[i]=false;
-
 	queue<int> Q;
 	Q.push(x);
 	visitato[x]=true;
@@ -212,6 +207,8 @@ int main()
 
 	buildG();
 
+	for(int i=0;i<N;++i)
+		visitato[i]=false;
 	for(int i=1;i<N;++i) {
 		if(!adj[i].empty()&&!visitato[i]) {
 			vector<int> Cc=componente(i);
@@ -234,16 +231,18 @@ int main()
 				gettimeofday(&end, NULL);
 				cout << "Tempo di esecuzione: " << "\n\t" << ((end.tv_sec - beg.tv_sec)*1000000 + end.tv_usec - beg.tv_usec)/1000 << " ms" << endl;
 
-				freopen("txt/debug.txt", "a", stdout);
+				freopen("txt/centrality.txt", "a", stdout);
 				for(auto j:Cc) {
 					// _lin[j]=(float)(S^2)*_clos[j];
 					// sintassi: nodo: grado closeness harmonic
-					cout << j << ": " << adj[j].size() << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << (_harm[j]/(float)k) << endl;
+					cout << j << ": " << adj[j].size() << " " << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << (_harm[j]/(float)k) << endl;
 				}
 				cout << endl;
 				fclose(stdout);
 
 				// geometric(306);
+
+				sample.clear();
 			}
 		}
 	}
