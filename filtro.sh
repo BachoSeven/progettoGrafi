@@ -54,5 +54,5 @@ main() {
 	# awk -F' ' '{print>$1}' Relazioni.txt
 }
 
-updatelinks
+# updatelinks
 main

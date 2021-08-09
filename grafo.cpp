@@ -210,7 +210,7 @@ void geom_sample(vector<int> sample, vector<int> comp)
 			auto t=_S.top();
 			_S.pop();
 			for(auto w:Pred[t]) {
-					_delta[w]+=((float)_sigma[w]/(double)_sigma[t])*(1.+_delta[t]);
+					_delta[w]+=(float) ((float)_sigma[w]/(double)_sigma[t])*(1.+_delta[t]);
 			}
 			if(t!=s) {
 					_betw[t]+=_delta[t];
@@ -221,7 +221,7 @@ void geom_sample(vector<int> sample, vector<int> comp)
 
 void printTop(vector<int> Cc)
 {
-	priority_queue<pair<float,int>> P,Q;
+	priority_queue<pair<float,int>> P,Q,R;
 	int m=10;
 	for (auto i:Cc) {
 		// O(S*log(m)) tramite heap min
@@ -237,20 +237,29 @@ void printTop(vector<int> Cc)
 				Q.pop();
 				Q.push(pair<float,int>(_harm[i], i));
 		}
+		if(R.size()<(unsigned)m) {
+				R.push(pair<float,int>(_betw[i],i));
+		} else if(R.top().first<_betw[i]) {
+				R.pop();
+				R.push(pair<float,int>(_betw[i], i));
+		}
 	}
-	cout << "i\t| Closeness\t\t\t| Harmonic" << endl;
-	cout << "--------------------------------------------------" << endl;
+	cout << "i\t| Closeness\t\t\t| Harmonic\t\t\t| Closeness" << endl;
+	cout << "-------------------------------------------------------------------------------------" << endl;
 	for (int i=0; i<m; ++i) {
 		int _i=P.top().second;
 		int __i=Q.top().second;
+		int ___i=R.top().second;
 		Actor p = *(find_if(A.begin(), A.end(), [_i](const Actor &a) { return a.id == _i; }));
 		Actor q = *(find_if(A.begin(), A.end(), [__i](const Actor &a) { return a.id == __i; }));
+		Actor r = *(find_if(A.begin(), A.end(), [___i](const Actor &a) { return a.id == ___i; }));
 		if(i == 0)
 			cout << "1 🏅" << "\t| " << p.name << "\t\t\t| " << q.name << endl;
 		else
-			cout << i+1 << "\t| " << p.name << "\t\t\t| " << q.name << endl;
+			cout << i+1 << "\t| " << p.name << "\t\t\t| " << q.name << "\t\t\t| " << r.name << endl;
 		P.pop();
 		Q.pop();
+		R.pop();
 	}
 }
 
@@ -260,9 +269,8 @@ int main()
 
 	freopen("txt/info.txt", "r", stdin);
 	cin >> N;
-	// N++;
 
-	// readNames();
+	readNames();
 
 	buildG();
 
@@ -277,8 +285,8 @@ int main()
 			vector<int> Cc=componente(i);
 			int S=Cc.size();
 			if(S>1000) {
-				// eps=0.3, delta=0.01(probablity >=99%)(k=436)
-				int k=ceil(2*(1/0.09)*(log(2)+log(S)+log(100)));
+				// eps=0.5, delta=0.1(probablity >=99%)(k=139)
+				int k=ceil(2*(1/0.25)*(log(2)+log(S)+log(10)));
 				vector<int> sample;
 				for (int i=0; i<k; ++i) {
 					sample.push_back(Cc[(rand() % S)]);
@@ -292,27 +300,30 @@ int main()
 					_lin[i]=0;
 				}
 
-				// struct timeval beg, end;
-				// gettimeofday(&beg, NULL);
+				struct timeval beg, end;
+				gettimeofday(&beg, NULL);
+				cout << "INIZIO GEOM_SAMPLE" << endl;
 				geom_sample(sample,Cc);
-				// gettimeofday(&end, NULL);
-				// cout << "Tempo di esecuzione: " << "\n\t" << ((end.tv_sec - beg.tv_sec)*1000000 + end.tv_usec - beg.tv_usec)/1000 << " ms" << endl;
+				cout << "FINE GEOM_SAMPLE" << endl;
+				gettimeofday(&end, NULL);
+				cout << "Tempo di esecuzione: " << "\n\t" << ((end.tv_sec - beg.tv_sec)*1000000 + end.tv_usec - beg.tv_usec)/1000 << " ms" << endl;
 
-				// freopen("txt/centrality.txt", "a", stdout);
-				// for(auto j:Cc) {
-					// // _lin[j]=(float)(S^2)*_clos[j];
-					// // sintassi: nodo: grado closeness harmonic betweenness
-					// cout << j << ": " << adj[j].size() << " " << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << ((float)S*_harm[j])/((float)(S-1)*(float)k) << " " << _betw[j]/((float)S*(float)(S-1))  << endl;
-				// }
-				// cout << endl;
-				// fclose(stdout);
+				freopen("txt/centrality.txt", "a", stdout);
+				for(auto j:Cc) {
+					// _lin[j]=(float)(S^2)*_clos[j];
+					// sintassi: nodo: grado closeness harmonic betweenness (TODO: /N(N-1) o Cosa?)
+					cout << j << ": " << adj[j].size() << " " << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << ((float)S*_harm[j])/((float)(S-1)*(float)k) << " " << ((float)S*_betw[j])/((float)k*(float)(S-1))  << endl;
+				}
+				cout << endl;
+				fclose(stdout);
 
+				// TODO: implement exact betweenness to check values...
 				// geom_exact(306,S);
 				// geom_exact(616,S);
 
-				// freopen("TOP.txt","w",stdout);
+				freopen("TOP.txt","w",stdout);
 				printTop(Cc);
-				// fclose(stdout);
+				fclose(stdout);
 
 				sample.clear();
 			}
