@@ -177,6 +177,7 @@ void geom_exact(int s,int S)
 void geom_sample(vector<int> sample, vector<int> comp)
 {
 	for(auto s:sample) {
+		cout << "sample: " << s << endl;
 		for(auto i:comp) {
 			visitato[i]=false;
 		}
@@ -278,6 +279,10 @@ int main()
 	// printG();
 	// fclose(stdout);
 
+	// reset
+	freopen("txt/centrality.txt", "w", stdout);
+	fclose(stdout);
+
 	for(int i=0; i<N; ++i)
 		visitato[i]=false;
 	for(int i=1; i<N; ++i) {
@@ -285,8 +290,8 @@ int main()
 			vector<int> Cc=componente(i);
 			int S=Cc.size();
 			if(S>1000) {
-				// eps=0.5, delta=0.1(probablity >=99%)(k=139)
-				int k=ceil(2*(1/0.25)*(log(2)+log(S)+log(10)));
+				// eps=1, delta=0.1(probablity >=99%)(k=35)
+				int k=ceil(2*(log(2)+log(S)+log(10)));
 				vector<int> sample;
 				for (int i=0; i<k; ++i) {
 					sample.push_back(Cc[(rand() % S)]);
@@ -307,12 +312,11 @@ int main()
 				cout << "FINE GEOM_SAMPLE" << endl;
 				gettimeofday(&end, NULL);
 				cout << "Tempo di esecuzione: " << "\n\t" << ((end.tv_sec - beg.tv_sec)*1000000 + end.tv_usec - beg.tv_usec)/1000 << " ms" << endl;
-
 				freopen("txt/centrality.txt", "a", stdout);
 				for(auto j:Cc) {
 					// _lin[j]=(float)(S^2)*_clos[j];
 					// sintassi: nodo: grado closeness harmonic betweenness (TODO: /N(N-1) o Cosa?)
-					cout << j << ": " << adj[j].size() << " " << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << ((float)S*_harm[j])/((float)(S-1)*(float)k) << " " << ((float)S*_betw[j])/((float)k*(float)(S-1))  << endl;
+					cout << j << ": " << adj[j].size() << " " << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << ((float)S*_harm[j])/((float)(S-1)*(float)k) << " " << (2.*_betw[j])/((float)k*(float)S*(float)(S-1))  << endl;
 				}
 				cout << endl;
 				fclose(stdout);
