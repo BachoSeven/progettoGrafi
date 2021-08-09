@@ -316,7 +316,7 @@ int main()
 				for(auto j:Cc) {
 					// _lin[j]=(float)(S^2)*_clos[j];
 					// sintassi: nodo: grado closeness harmonic betweenness
-					cout << j << ": " << adj[j].size() << " " << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << ((float)S*_harm[j])/((float)(S-1)*(float)k) << " " << (2.*_betw[j])/(float)k  << endl;
+					cout << j << ": " << adj[j].size() << " " << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << ((float)S*_harm[j])/((float)(S-1)*(float)k) << " " << (2.*_betw[j])/((float)k*(float)S*(float)(S-1))  << endl;
 				}
 				cout << endl;
 				fclose(stdout);
