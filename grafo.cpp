@@ -25,13 +25,14 @@ struct Actor {
 int N;
 constexpr int MAXN=13000000;
 vector<int> adj[MAXN];
-bool visitato[MAXN];
+bool visited[MAXN];
 int Dist[MAXN];
 
 // per approx
 float _clos[MAXN];
 float _harm[MAXN];
 float _betw[MAXN];
+bool direction[MAXN];
 int _sigma[MAXN];
 float _delta[MAXN];
 list<int> Pred[MAXN];
@@ -125,15 +126,15 @@ vector<int> componente(int x)
 	vector<int> Cc;
 	queue<int> Q;
 	Q.push(x);
-	visitato[x]=true;
+	visited[x]=true;
 
 	while(!Q.empty()) {
 		auto u=Q.front();
 		Q.pop();
 		for(auto v:adj[u]) {
-			if(!visitato[v]) {
+			if(!visited[v]) {
 				Q.push(v);
-				visitato[v]=true;
+				visited[v]=true;
 				Cc.push_back(v);
 			}
 		}
@@ -144,11 +145,11 @@ vector<int> componente(int x)
 void geom_exact(int s,int S)
 {
 	for(int i=0; i<N; ++i)
-		visitato[i]=false;
+		visited[i]=false;
 
 	queue<int> Q;
 	Q.push(s);
-	visitato[s]=true;
+	visited[s]=true;
 	Dist[s]=0;
 
 	float clos=0;
@@ -158,9 +159,9 @@ void geom_exact(int s,int S)
 		auto u=Q.front();
 		Q.pop();
 		for(auto v:adj[u]) {
-			if(!visitato[v]) {
+			if(!visited[v]) {
 				Q.push(v);
-				visitato[v]=true;
+				visited[v]=true;
 				Dist[v]=Dist[u]+1;
 				clos+=Dist[v];
 				harm+=1./Dist[v];
@@ -179,11 +180,11 @@ void geom_sample(vector<int> sample, vector<int> comp)
 	for(auto s:sample) {
 		cout << "sample: " << s << endl;
 		for(auto i:comp) {
-			visitato[i]=false;
+			visited[i]=false;
 		}
 		queue<int> Q;
 		Q.push(s);
-		visitato[s]=true;
+		visited[s]=true;
 		Dist[s]=0;
 		stack<int> _S;
 		_sigma[s]=1;
@@ -193,9 +194,9 @@ void geom_sample(vector<int> sample, vector<int> comp)
 			Q.pop();
 			_S.push(u);
 			for(auto v:adj[u]) {
-				if(!visitato[v]) {
+				if(!visited[v]) {
 					Q.push(v);
-					visitato[v]=true;
+					visited[v]=true;
 					Dist[v]=Dist[u]+1;
 					_clos[v]+=Dist[v];
 					_harm[v]+=1./Dist[v];
@@ -211,10 +212,13 @@ void geom_sample(vector<int> sample, vector<int> comp)
 			auto t=_S.top();
 			_S.pop();
 			for(auto w:Pred[t]) {
-					_delta[w]+=(float) ((float)_sigma[w]/(double)_sigma[t])*(1.+_delta[t]);
+				if(!direction[w])
+					_delta[w]+=((float)_sigma[w]/(float)_sigma[t])*((1./(float)Dist[w])+_delta[t]);
+				else
+					_delta[w]+=((float)_sigma[w]/(float)_sigma[t])*((1./(float)Dist[t]-1./(float)Dist[w])+_delta[t]);
 			}
 			if(t!=s) {
-					_betw[t]+=_delta[t];
+					_betw[t]+=(float)Dist[t]*_delta[t];
 			}
 		}
 	}
@@ -255,7 +259,7 @@ void printTop(vector<int> Cc)
 		Actor q = *(find_if(A.begin(), A.end(), [__i](const Actor &a) { return a.id == __i; }));
 		Actor r = *(find_if(A.begin(), A.end(), [___i](const Actor &a) { return a.id == ___i; }));
 		if(i == 0)
-			cout << "1 🏅" << "\t| " << p.name << "\t\t\t| " << q.name << endl;
+			cout << "1 🏅" << "\t| " << p.name << "\t\t\t| " << q.name << "\t\t\t| " << r.name << endl;
 		else
 			cout << i+1 << "\t| " << p.name << "\t\t\t| " << q.name << "\t\t\t| " << r.name << endl;
 		P.pop();
@@ -279,14 +283,10 @@ int main()
 	// printG();
 	// fclose(stdout);
 
-	// reset
-	freopen("txt/centrality.txt", "w", stdout);
-	fclose(stdout);
-
 	for(int i=0; i<N; ++i)
-		visitato[i]=false;
+		visited[i]=false;
 	for(int i=1; i<N; ++i) {
-		if(!adj[i].empty()&&!visitato[i]) {
+		if(!adj[i].empty()&&!visited[i]) {
 			vector<int> Cc=componente(i);
 			int S=Cc.size();
 			if(S>1000) {
@@ -295,6 +295,8 @@ int main()
 				vector<int> sample;
 				for (int i=0; i<k; ++i) {
 					sample.push_back(Cc[(rand() % S)]);
+					// 0=forward, 1=backward
+					direction[i]=rand()%2==0;
 				}
 				for(auto i:Cc) {
 					_harm[i]=0;
@@ -307,16 +309,14 @@ int main()
 
 				struct timeval beg, end;
 				gettimeofday(&beg, NULL);
-				cout << "INIZIO GEOM_SAMPLE" << endl;
 				geom_sample(sample,Cc);
-				cout << "FINE GEOM_SAMPLE" << endl;
 				gettimeofday(&end, NULL);
 				cout << "Tempo di esecuzione: " << "\n\t" << ((end.tv_sec - beg.tv_sec)*1000000 + end.tv_usec - beg.tv_usec)/1000 << " ms" << endl;
 				freopen("txt/centrality.txt", "a", stdout);
 				for(auto j:Cc) {
 					// _lin[j]=(float)(S^2)*_clos[j];
-					// sintassi: nodo: grado closeness harmonic betweenness (TODO: /N(N-1) o Cosa?)
-					cout << j << ": " << adj[j].size() << " " << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << ((float)S*_harm[j])/((float)(S-1)*(float)k) << " " << (2.*_betw[j])/((float)k*(float)S*(float)(S-1))  << endl;
+					// sintassi: nodo: grado closeness harmonic betweenness
+					cout << j << ": " << adj[j].size() << " " << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << ((float)S*_harm[j])/((float)(S-1)*(float)k) << " " << (2.*_betw[j])/(float)k  << endl;
 				}
 				cout << endl;
 				fclose(stdout);
