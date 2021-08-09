@@ -209,8 +209,7 @@ void geom_sample(vector<int> sample, vector<int> comp)
 		while(!_S.empty()) {
 			auto t=_S.top();
 			_S.pop();
-			for(auto i=Pred[t].begin(); i!=Pred[t].end(); ++i) {
-					int w=*i;
+			for(auto w:Pred[t]) {
 					_delta[w]+=((float)_sigma[w]/(double)_sigma[t])*(1.+_delta[t]);
 			}
 			if(t!=s) {
