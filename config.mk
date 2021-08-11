@@ -1,3 +1,4 @@
 CC = g++
 
-CFLAGS = -g -Wall
+CFLAGS = -O3 -march=skylake -flto
+# CFLAGS = -fopenmp -g -Wall

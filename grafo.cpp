@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <string>
 #include <queue>
@@ -8,6 +9,7 @@
 #include <algorithm> // find
 #include <math.h> // ceil
 #include <sys/time.h> // per gettimeofday
+// #include <omp.h> // multi-threading
 
 using namespace std;
 
@@ -36,7 +38,6 @@ bool direction[MAXN];
 int _sigma[MAXN];
 float _delta[MAXN];
 list<int> Pred[MAXN];
-float _lin[MAXN];
 int S; // grandezza componenti
 
 vector<Actor> A;
@@ -142,39 +143,6 @@ vector<int> componente(int x)
 	return Cc;
 }
 
-void geom_exact(int s,int S)
-{
-	for(int i=0; i<N; ++i)
-		visited[i]=false;
-
-	queue<int> Q;
-	Q.push(s);
-	visited[s]=true;
-	Dist[s]=0;
-
-	float clos=0;
-	float harm=0;
-
-	while(!Q.empty()) {
-		auto u=Q.front();
-		Q.pop();
-		for(auto v:adj[u]) {
-			if(!visited[v]) {
-				Q.push(v);
-				visited[v]=true;
-				Dist[v]=Dist[u]+1;
-				clos+=Dist[v];
-				harm+=1./Dist[v];
-			}
-		}
-	}
-
-	// valori normalizzati per confrontarli con le approssimazioni
-	cout << (S-1)*1./clos << " " << harm/(S-1) << endl;
-	// Lin
-	// cout << (float)(S^2)*clos << " ";
-}
-
 void geom_sample(vector<int> sample, vector<int> comp)
 {
 	for(auto s:sample) {
@@ -228,10 +196,41 @@ void geom_sample(vector<int> sample, vector<int> comp)
 	}
 }
 
+void geom_exact(int s,int S)
+{
+	for(int i=0; i<N; ++i)
+		visited[i]=false;
+
+	queue<int> Q;
+	Q.push(s);
+	visited[s]=true;
+	Dist[s]=0;
+
+	float clos=0;
+	float harm=0;
+
+	while(!Q.empty()) {
+		auto u=Q.front();
+		Q.pop();
+		for(auto v:adj[u]) {
+			if(!visited[v]) {
+				Q.push(v);
+				visited[v]=true;
+				Dist[v]=Dist[u]+1;
+				clos+=Dist[v];
+				harm+=1./Dist[v];
+			}
+		}
+	}
+
+	// valori normalizzati per confrontarli con le approssimazioni
+	cout << (S-1)*1./clos << " " << harm/(S-1) << endl;
+}
+
 void printTop(vector<int> Cc)
 {
 	priority_queue<pair<float,int>> P,Q,R;
-	int m=10;
+	int m=100;
 	for (auto i:Cc) {
 		// O(S*log(m)) tramite heap min
 		if(P.size()<(unsigned)m) {
@@ -253,8 +252,7 @@ void printTop(vector<int> Cc)
 				R.push(pair<float,int>(_betw[i], i));
 		}
 	}
-	cout << "i\t| Closeness\t\t\t| Harmonic\t\t\t| Betweenness" << endl;
-	cout << "---------------------------------------------------------------------------------------" << endl;
+ cout << left << setw(4) << "i" << left << setw(30) << "Closeness" << left << setw(30) << "Harmonic" << left << setw(30) << "Betweenness" << "\n\n";
 	for (int i=0; i<m; ++i) {
 		int _i=P.top().second;
 		int __i=Q.top().second;
@@ -263,9 +261,9 @@ void printTop(vector<int> Cc)
 		Actor q = *(find_if(A.begin(), A.end(), [__i](const Actor &a) { return a.id == __i; }));
 		Actor r = *(find_if(A.begin(), A.end(), [___i](const Actor &a) { return a.id == ___i; }));
 		if(i == 0)
-			cout << "1 🏅" << "\t| " << p.name << "\t\t\t| " << q.name << "\t\t\t| " << r.name << endl;
+			cout << left << setw(4) << "1🏅" << left << setw(30) << p.name << left << setw(30) << q.name << left << setw(30) << r.name << endl;
 		else
-			cout << i+1 << "\t| " << p.name << "\t\t\t| " << q.name << "\t\t\t| " << r.name << endl;
+			cout << left << setw(4) << i+1 << left << setw(30) << p.name << left << setw(30) << q.name << left << setw(30) << r.name << endl;
 		P.pop();
 		Q.pop();
 		R.pop();
@@ -278,6 +276,7 @@ int main()
 
 	freopen("txt/info.txt", "r", stdin);
 	cin >> N;
+	N++;
 
 	readNames();
 
@@ -288,54 +287,43 @@ int main()
 
 	for(int i=0; i<N; ++i)
 		visited[i]=false;
-	// for(int i=1; i<N; ++i) {
-		// if(!adj[i].empty()&&!visited[i]) {
-			vector<int> Cc=componente(i);
-			int S=Cc.size();
-			if(S>0) {
-				// eps=0.4, delta=0.01(probablity >=99%)(k=236)
-				int k=ceil(2*(1./0.16)*(log(2)+log(S)+log(100)));
-				vector<int> sample;
-				for (int j=0; j<k; ++j) {
-					int r=rand()%S;
-					sample.push_back(Cc[r]);
-					// 0=forward, 1=backward
-					direction[Cc[r]]=rand()%2 == 0;
-				}
-				for(auto i:Cc) {
-					_harm[i]=0;
-					_clos[i]=0;
-					_betw[i]=0;
-					_sigma[i]=0;
-					_delta[i]=0;
-					// _lin[i]=0;
-				}
-
-				struct timeval beg, end;
-				gettimeofday(&beg, NULL);
-				geom_sample(sample,Cc);
-				gettimeofday(&end, NULL);
-				cout << "Tempo di esecuzione: " << "\n\t" << ((end.tv_sec - beg.tv_sec)*1000000 + end.tv_usec - beg.tv_usec)/1000 << " ms" << endl;
-				freopen("txt/centrality.txt", "w", stdout);
-				for(auto j:Cc) {
-					// _lin[j]=(float)(S^2)*_clos[j];
-					// sintassi: nodo: grado closeness harmonic betweenness
-					cout << j << ": " << adj[j].size() << " " << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << ((float)S*_harm[j])/((float)(S-1)*(float)k) << " " << (2.*_betw[j])/((float)k*(float)S*(float)(S-1))  << endl;
-				}
-				cout << endl;
-
-				// geom_exact(306,S);
-				// geom_exact(616,S);
-
-				freopen("txt/top.txt","w",stdout);
-				cout << numC << endl;
-				printTop(Cc);
-				cout << endl;
-
-				sample.clear();
-			}
-		}
+	vector<int> Cc=componente(306);
+	int S=Cc.size();
+	// eps=0.3, delta=0.01(probablity >=99% => k=436
+	int k=ceil(2*(1./0.09)*(log(2)+log(S)+log(100)));
+	vector<int> sample;
+	for (int j=0; j<k; ++j) {
+		int r=rand()%S;
+		sample.push_back(Cc[r]);
+		// 0=forward, 1=backward
+		direction[Cc[r]]=rand()%2 == 0;
 	}
+	for(auto i:Cc) {
+		_harm[i]=0;
+		_clos[i]=0;
+		_betw[i]=0;
+		_sigma[i]=0;
+		_delta[i]=0;
+	}
+
+	struct timeval beg, end;
+	gettimeofday(&beg, NULL);
+	geom_sample(sample,Cc);
+	gettimeofday(&end, NULL);
+	cout << "Tempo impiegato per calcolare la centralità: " << "\n\t" << ((float)((end.tv_sec - beg.tv_sec)*1000000 + end.tv_usec - beg.tv_usec))/1000000. << " s" << endl;
+
+	freopen("txt/centrality.txt", "w", stdout);
+	for(auto j:Cc) {
+		// nodo: grado closeness harmonic betweenness
+		cout << j << ": " << adj[j].size() << " " << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << ((float)S*_harm[j])/((float)(S-1)*(float)k) << " " << (2.*_betw[j])/((float)k*(float)S*(float)(S-1))  << endl;
+	}
+
+	// geom_exact(306,S);
+	// geom_exact(616,S);
+
+	freopen("txt/top.txt","w",stdout);
+	printTop(Cc);
+
 	fclose(stdout);
 	return 0;
 }
