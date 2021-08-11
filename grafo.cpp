@@ -178,7 +178,6 @@ void geom_exact(int s,int S)
 void geom_sample(vector<int> sample, vector<int> comp)
 {
 	for(auto s:sample) {
-		cout << "sample: " << s << endl;
 		for(auto i:comp) {
 			visited[i]=false;
 		}
@@ -212,14 +211,19 @@ void geom_sample(vector<int> sample, vector<int> comp)
 			auto t=_S.top();
 			_S.pop();
 			for(auto w:Pred[t]) {
-				if(!direction[w])
+				if(!direction[w]) {
 					_delta[w]+=((float)_sigma[w]/(float)_sigma[t])*((1./(float)Dist[w])+_delta[t]);
-				else
+				} else {
 					_delta[w]+=((float)_sigma[w]/(float)_sigma[t])*((1./(float)Dist[t]-1./(float)Dist[w])+_delta[t]);
+				}
 			}
 			if(t!=s) {
 					_betw[t]+=(float)Dist[t]*_delta[t];
 			}
+			// cleanup
+			Pred[t].clear();
+			_delta[t]=0;
+			_sigma[t]=0;
 		}
 	}
 }
@@ -249,8 +253,8 @@ void printTop(vector<int> Cc)
 				R.push(pair<float,int>(_betw[i], i));
 		}
 	}
-	cout << "i\t| Closeness\t\t\t| Harmonic\t\t\t| Closeness" << endl;
-	cout << "-------------------------------------------------------------------------------------" << endl;
+	cout << "i\t| Closeness\t\t\t| Harmonic\t\t\t| Betweenness" << endl;
+	cout << "---------------------------------------------------------------------------------------" << endl;
 	for (int i=0; i<m; ++i) {
 		int _i=P.top().second;
 		int __i=Q.top().second;
@@ -281,22 +285,22 @@ int main()
 
 	// freopen("txt/grafo.txt","w",stdout);
 	// printG();
-	// fclose(stdout);
 
 	for(int i=0; i<N; ++i)
 		visited[i]=false;
-	for(int i=1; i<N; ++i) {
-		if(!adj[i].empty()&&!visited[i]) {
+	// for(int i=1; i<N; ++i) {
+		// if(!adj[i].empty()&&!visited[i]) {
 			vector<int> Cc=componente(i);
 			int S=Cc.size();
-			if(S>1000) {
-				// eps=1, delta=0.1(probablity >=99%)(k=35)
-				int k=ceil(2*(log(2)+log(S)+log(10)));
+			if(S>0) {
+				// eps=0.4, delta=0.01(probablity >=99%)(k=236)
+				int k=ceil(2*(1./0.16)*(log(2)+log(S)+log(100)));
 				vector<int> sample;
-				for (int i=0; i<k; ++i) {
-					sample.push_back(Cc[(rand() % S)]);
+				for (int j=0; j<k; ++j) {
+					int r=rand()%S;
+					sample.push_back(Cc[r]);
 					// 0=forward, 1=backward
-					direction[i]=rand()%2==0;
+					direction[Cc[r]]=rand()%2 == 0;
 				}
 				for(auto i:Cc) {
 					_harm[i]=0;
@@ -304,7 +308,7 @@ int main()
 					_betw[i]=0;
 					_sigma[i]=0;
 					_delta[i]=0;
-					_lin[i]=0;
+					// _lin[i]=0;
 				}
 
 				struct timeval beg, end;
@@ -312,26 +316,26 @@ int main()
 				geom_sample(sample,Cc);
 				gettimeofday(&end, NULL);
 				cout << "Tempo di esecuzione: " << "\n\t" << ((end.tv_sec - beg.tv_sec)*1000000 + end.tv_usec - beg.tv_usec)/1000 << " ms" << endl;
-				freopen("txt/centrality.txt", "a", stdout);
+				freopen("txt/centrality.txt", "w", stdout);
 				for(auto j:Cc) {
 					// _lin[j]=(float)(S^2)*_clos[j];
 					// sintassi: nodo: grado closeness harmonic betweenness
 					cout << j << ": " << adj[j].size() << " " << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << ((float)S*_harm[j])/((float)(S-1)*(float)k) << " " << (2.*_betw[j])/((float)k*(float)S*(float)(S-1))  << endl;
 				}
 				cout << endl;
-				fclose(stdout);
 
-				// TODO: implement exact betweenness to check values...
 				// geom_exact(306,S);
 				// geom_exact(616,S);
 
-				freopen("TOP.txt","w",stdout);
+				freopen("txt/top.txt","w",stdout);
+				cout << numC << endl;
 				printTop(Cc);
-				fclose(stdout);
+				cout << endl;
 
 				sample.clear();
 			}
 		}
 	}
+	fclose(stdout);
 	return 0;
 }
