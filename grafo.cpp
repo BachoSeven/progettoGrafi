@@ -289,8 +289,10 @@ int main()
 		visited[i]=false;
 	vector<int> Cc=componente(306);
 	int S=Cc.size();
-	// eps=0.3, delta=0.01(probablity >=99% => k=436
-	int k=ceil(2*(1./0.09)*(log(2)+log(S)+log(100)));
+	// eps=0.1, delta=0.01(probablity >=99% => k=436
+	// int k=ceil(2*(1./0.09)*(log(2)+log(S)+log(100)));
+	// con k~1k si ottengono risultati coerenti per la betweenness
+	int k=1000;
 	vector<int> sample;
 	for (int j=0; j<k; ++j) {
 		int r=rand()%S;
@@ -314,8 +316,8 @@ int main()
 
 	freopen("txt/centrality.txt", "w", stdout);
 	for(auto j:Cc) {
-		// nodo: grado closeness harmonic betweenness
-		cout << j << ": " << adj[j].size() << " " << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << ((float)S*_harm[j])/((float)(S-1)*(float)k) << " " << (2.*_betw[j])/((float)k*(float)S*(float)(S-1))  << endl;
+		// nodo: grado closeness harmonic betweenness(*2 stimatore corretto, ma /2 perché undirected(brandes2008))
+		cout << j << ": " << adj[j].size() << " " << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << ((float)S*_harm[j])/((float)(S-1)*(float)k) << " " << _betw[j]/((float)k*(float)(S-1))  << endl;
 	}
 
 	// geom_exact(306,S);

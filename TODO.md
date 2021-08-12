@@ -1,4 +1,5 @@
 ## Problemi
+- [ ] Lin (removed in "Optimizations..." commit)
 - [x] Mantenere gli identificativi degli attori mentre vengono salvati nel grafo --> struct?
 - [x] Come costruire estrapolare gli archi in modo non ridondante da Relazioni.txt?
 - ~~Problema inverso di quello sopra: come assegnare numeri crescenti a partire da 1 agli attori presenti in Relazioni?~~
