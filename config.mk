@@ -1,3 +1,3 @@
 CC = g++
 
-CFLAGS = -Ofast -march=skylake -flto
+CFLAGS = -O3 -march=skylake -flto
