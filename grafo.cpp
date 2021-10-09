@@ -123,7 +123,7 @@ void printG()
 
 vector<int> componente(int x)
 {
-	vector<int> Cc;
+	vector<int> comp;
 	queue<int> Q;
 	Q.push(x);
 	visited[x]=true;
@@ -135,11 +135,11 @@ vector<int> componente(int x)
 			if(!visited[v]) {
 				Q.push(v);
 				visited[v]=true;
-				Cc.push_back(v);
+				comp.push_back(v);
 			}
 		}
 	}
-	return Cc;
+	return comp;
 }
 
 void geom_sample(vector<int> sample, vector<int> comp)
@@ -284,9 +284,11 @@ int main()
 	// freopen("txt/grafo.txt","w",stdout);
 	// printG();
 
-	for(int i=0; i<N; ++i)
+	for(int i=0; i<N; ++i) {
 		visited[i]=false;
-	vector<int> Cc=componente(306);
+	}
+	Actor brad = *(find_if(A.begin(), A.end(), [](const Actor &a) { return a.name == "Brad Pitt"; }));
+	vector<int> Cc=componente(brad.id);
 	int S=Cc.size();
 	// eps=0.1, delta=0.01(probablity >=99% => k=436
 	// int k=ceil(2*(1./0.09)*(log(2)+log(S)+log(100)));
