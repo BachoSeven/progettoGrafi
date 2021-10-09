@@ -9,7 +9,6 @@
 #include <algorithm> // find
 #include <math.h> // ceil
 #include <sys/time.h> // per gettimeofday
-// #include <omp.h> // multi-threading
 
 using namespace std;
 
