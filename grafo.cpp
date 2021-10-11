@@ -253,12 +253,12 @@ void printTop(vector<int> Cc)
 	}
  cout << left << setw(4) << "i" << left << setw(30) << "Closeness" << left << setw(30) << "Harmonic" << left << setw(30) << "Betweenness" << "\n\n";
 	for (int i=0; i<m; ++i) {
-		int j=P.top().second;
-		Actor p = *(find_if(A.begin(), A.end(), [j](const Actor &a) { return a.id == j; }));
-		int j=Q.top().second;
-		Actor q = *(find_if(A.begin(), A.end(), [j](const Actor &a) { return a.id == j; }));
-		int j=R.top().second;
-		Actor r = *(find_if(A.begin(), A.end(), [j](const Actor &a) { return a.id == j; }));
+		int tmpActorId=P.top().second;
+		Actor p = *(find_if(A.begin(), A.end(), [tmpActorId](const Actor &a) { return a.id == tmpActorId; }));
+		tmpActorId=Q.top().second;
+		Actor q = *(find_if(A.begin(), A.end(), [tmpActorId](const Actor &a) { return a.id == tmpActorId; }));
+		tmpActorId=R.top().second;
+		Actor r = *(find_if(A.begin(), A.end(), [tmpActorId](const Actor &a) { return a.id == tmpActorId; }));
 		if(i == 0)
 			cout << left << setw(4) << "1🏅" << left << setw(30) << p.name << left << setw(30) << q.name << left << setw(30) << r.name << endl;
 		else
