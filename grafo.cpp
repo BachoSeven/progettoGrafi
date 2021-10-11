@@ -30,12 +30,12 @@ bool visited[MAXN];
 int Dist[MAXN];
 
 // per approx
-float _clos[MAXN];
-float _harm[MAXN];
-float _betw[MAXN];
+float Clos[MAXN];
+float Harm[MAXN];
+float Betw[MAXN];
 bool direction[MAXN];
-int _sigma[MAXN];
-float _delta[MAXN];
+int Sigma[MAXN];
+float Delta[MAXN];
 list<int> Pred[MAXN];
 int S; // grandezza componenti
 
@@ -74,19 +74,19 @@ void buildG()
 	vector<int> filmcrew;
 
 	getline(relazioni,s);
-	int current=stoi(s.substr(0, s.find(del)));
+	int currentFilm=stoi(s.substr(0, s.find(del)));
 
 	while(getline(relazioni,t)) {
-		int next=stoi(t.substr(0, t.find(del)));
+		int nextFilm=stoi(t.substr(0, t.find(del)));
 
-		if(next == current) {
+		if(nextFilm == currentFilm) {
 			u=stoi(s.substr(s.find(del)+1));
 			filmcrew.push_back(u);
-			while((next == current)&&(getline(relazioni,r))) {
+			while((nextFilm == currentFilm)&&(getline(relazioni,r))) {
 				v=stoi(t.substr(t.find(del)+1));
 				filmcrew.push_back(v);
 				t=r;
-				next=stoi(t.substr(0, t.find(del)));
+				nextFilm=stoi(t.substr(0, t.find(del)));
 			}
 
 			for(auto primo=filmcrew.begin(); primo!=filmcrew.end(); ++primo) {
@@ -101,7 +101,7 @@ void buildG()
 				}
 			}
 		}
-		current=next;
+		currentFilm=nextFilm;
 		s=t;
 		filmcrew.clear();
 	}
@@ -153,7 +153,7 @@ void geom_sample(vector<int> sample, vector<int> comp)
 		visited[s]=true;
 		Dist[s]=0;
 		stack<int> _S;
-		_sigma[s]=1;
+		Sigma[s]=1;
 
 		while(!Q.empty()) {
 			auto u=Q.front();
@@ -164,12 +164,12 @@ void geom_sample(vector<int> sample, vector<int> comp)
 					Q.push(v);
 					visited[v]=true;
 					Dist[v]=Dist[u]+1;
-					_clos[v]+=Dist[v];
-					_harm[v]+=1./Dist[v];
+					Clos[v]+=Dist[v];
+					Harm[v]+=1./Dist[v];
 				}
 				// Abbiamo già incontrato u, e fornisce un SP per v
 				if(Dist[v] == Dist[u]+1) {
-					_sigma[v]+=_sigma[u];
+					Sigma[v]+=Sigma[u];
 					Pred[v].push_back(u);
 				}
 			}
@@ -179,18 +179,18 @@ void geom_sample(vector<int> sample, vector<int> comp)
 			_S.pop();
 			for(auto w:Pred[t]) {
 				if(!direction[w]) {
-					_delta[w]+=((float)_sigma[w]/(float)_sigma[t])*((1./(float)Dist[w])+_delta[t]);
+					Delta[w]+=((float)Sigma[w]/(float)Sigma[t])*((1./(float)Dist[w])+Delta[t]);
 				} else {
-					_delta[w]+=((float)_sigma[w]/(float)_sigma[t])*((1./(float)Dist[t]-1./(float)Dist[w])+_delta[t]);
+					Delta[w]+=((float)Sigma[w]/(float)Sigma[t])*((1./(float)Dist[t]-1./(float)Dist[w])+Delta[t]);
 				}
 			}
 			if(t!=s) {
-					_betw[t]+=(float)Dist[t]*_delta[t];
+					Betw[t]+=(float)Dist[t]*Delta[t];
 			}
 			// cleanup
 			Pred[t].clear();
-			_delta[t]=0;
-			_sigma[t]=0;
+			Delta[t]=0;
+			Sigma[t]=0;
 		}
 	}
 }
@@ -233,32 +233,32 @@ void printTop(vector<int> Cc)
 	for (auto i:Cc) {
 		// O(S*log(m)) tramite heap min
 		if(P.size()<(unsigned)m) {
-				P.push(pair<float,int>(_clos[i],i));
-		} else if(P.top().first<_clos[i]) {
+				P.push(pair<float,int>(Clos[i],i));
+		} else if(P.top().first<Clos[i]) {
 				P.pop();
-				P.push(pair<float,int>(_clos[i], i));
+				P.push(pair<float,int>(Clos[i], i));
 		}
 		if(Q.size()<(unsigned)m) {
-				Q.push(pair<float,int>(_harm[i],i));
-		} else if(Q.top().first <_harm[i]) {
+				Q.push(pair<float,int>(Harm[i],i));
+		} else if(Q.top().first <Harm[i]) {
 				Q.pop();
-				Q.push(pair<float,int>(_harm[i], i));
+				Q.push(pair<float,int>(Harm[i], i));
 		}
 		if(R.size()<(unsigned)m) {
-				R.push(pair<float,int>(_betw[i],i));
-		} else if(R.top().first<_betw[i]) {
+				R.push(pair<float,int>(Betw[i],i));
+		} else if(R.top().first<Betw[i]) {
 				R.pop();
-				R.push(pair<float,int>(_betw[i], i));
+				R.push(pair<float,int>(Betw[i], i));
 		}
 	}
  cout << left << setw(4) << "i" << left << setw(30) << "Closeness" << left << setw(30) << "Harmonic" << left << setw(30) << "Betweenness" << "\n\n";
 	for (int i=0; i<m; ++i) {
-		int _i=P.top().second;
-		int __i=Q.top().second;
-		int ___i=R.top().second;
-		Actor p = *(find_if(A.begin(), A.end(), [_i](const Actor &a) { return a.id == _i; }));
-		Actor q = *(find_if(A.begin(), A.end(), [__i](const Actor &a) { return a.id == __i; }));
-		Actor r = *(find_if(A.begin(), A.end(), [___i](const Actor &a) { return a.id == ___i; }));
+		int j=P.top().second;
+		Actor p = *(find_if(A.begin(), A.end(), [j](const Actor &a) { return a.id == j; }));
+		int j=Q.top().second;
+		Actor q = *(find_if(A.begin(), A.end(), [j](const Actor &a) { return a.id == j; }));
+		int j=R.top().second;
+		Actor r = *(find_if(A.begin(), A.end(), [j](const Actor &a) { return a.id == j; }));
 		if(i == 0)
 			cout << left << setw(4) << "1🏅" << left << setw(30) << p.name << left << setw(30) << q.name << left << setw(30) << r.name << endl;
 		else
@@ -302,11 +302,11 @@ int main()
 		direction[Cc[r]]=rand()%2 == 0;
 	}
 	for(auto i:Cc) {
-		_harm[i]=0;
-		_clos[i]=0;
-		_betw[i]=0;
-		_sigma[i]=0;
-		_delta[i]=0;
+		Harm[i]=0;
+		Clos[i]=0;
+		Betw[i]=0;
+		Sigma[i]=0;
+		Delta[i]=0;
 	}
 
 	struct timeval beg, end;
@@ -318,7 +318,7 @@ int main()
 	freopen("txt/centrality.txt", "w", stdout);
 	for(auto j:Cc) {
 		// nodo: grado closeness harmonic betweenness(*2 stimatore corretto, ma /2 perché undirected(brandes2008))
-		cout << j << ": " << adj[j].size() << " " << (((float)(S-1)*(float)k)/((float)S*_clos[j])) << " " << ((float)S*_harm[j])/((float)(S-1)*(float)k) << " " << _betw[j]/((float)k*(float)(S-1))  << endl;
+		cout << j << ": " << adj[j].size() << " " << (((float)(S-1)*(float)k)/((float)S*Clos[j])) << " " << ((float)S*Harm[j])/((float)(S-1)*(float)k) << " " << Betw[j]/((float)k*(float)(S-1))  << endl;
 	}
 
 	// geom_exact(306,S);
