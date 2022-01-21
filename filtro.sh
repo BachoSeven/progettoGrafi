@@ -13,7 +13,7 @@ updatelinks() {
 main() {
 	zcat title.basics.tsv.gz |\
 		tail -n +2 |\
-		# Estraggo i film non adulti
+		# Estraggo i film non adulti (isAdult)
 		awk -F'\t' '$5 != 1' |\
 		# Salvo identificativi e nomi dei film
 		cut --output-delimiter=' ' -f1,3 |\
