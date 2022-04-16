@@ -24,7 +24,7 @@ struct Actor {
 
 // valore massimo di un identificativo di un attore
 int N;
-constexpr int MAXN=13000000;
+constexpr int MAXN=14000000;
 vector<int> adj[MAXN];
 bool visited[MAXN];
 int Dist[MAXN];
